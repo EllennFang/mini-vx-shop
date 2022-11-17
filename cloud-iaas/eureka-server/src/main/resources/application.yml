@@ -1,0 +1,37 @@
+server:
+  #  端口号
+  port: 8761
+spring:
+  application:
+    #服务名称
+    name: eureka-server
+  # 使用security保护eureka
+  security:
+    #设置登录eureka的用户名和密码
+    user:
+      #设置登录用户名
+      name: admin
+      #设置登录密码
+      password: admin
+#eureka配置
+eureka:
+  client:
+    service-url:
+      #指定eureka注册中心地址
+      defaultZone: http://admin:admin@localhost:8761/eureka
+    #从eureka服务中拉取注册列表
+    fetch-registry: true
+    #向eureka服务注册服务
+    register-with-eureka: false
+  #实例设置
+  instance:
+    hostname: localhost
+    prefer-ip-address: true #显示IP地址
+    instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}
+    #实例续约时间，单位秒
+    lease-renewal-interval-in-seconds: 5
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露监控等端点，让admin可以给你发心跳检测

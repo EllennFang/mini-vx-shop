@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--最外面的父项目boot-->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.12.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.powernode</groupId>
+    <artifactId>power-shop</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <!--父工程-->
+    <packaging>pom</packaging>
+    <!--子模块-->
+    <modules>
+        <module>cloud-iaas</module>
+        <module>power-common</module>
+        <module>power-business</module>
+    </modules>
+
+    <!--依赖版本控制-->
+    <properties>
+        <!-- 版本控制  druid mybatis-plus admin  fastjson  hutool  swaggerui  fastdfs  -->
+        <java.version>1.8</java.version>
+        <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+        <spring-boot-admin.version>2.3.0</spring-boot-admin.version>
+        <mybatis-plus.version>3.4.0</mybatis-plus.version>
+        <druid.starter.version>1.2.4</druid.starter.version>
+        <swagger.version>3.0.0</swagger.version>
+        <hutool.version>5.3.9</hutool.version>
+        <fastDFS.version>1.27.2</fastDFS.version>
+        <fastJson.version>1.2.73</fastJson.version>
+
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+
+
+
+    <!-- 全局依赖（所有子工程都会默认依赖以下依赖）：lombok、hutool、fastJson、mybatisplus常用注解依赖（如@TableField等） -->
+    <dependencies>
+        <!--lombok依赖-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!--MyBatisPlus常用注解依赖-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-annotation</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+        <!--第三方工具类依赖-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <!--解析json依赖-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastJson.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- 依赖管理（只有子工程声明了才会依赖）:spring-cloud、健康测试admin、myabtis-plus、druid-->
+    <dependencyManagement>
+        <dependencies>
+            <!--spring-cloud-->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--健康测试admin-->
+            <dependency>
+                <groupId>de.codecentric</groupId>
+                <artifactId>spring-boot-admin-dependencies</artifactId>
+                <version>${spring-boot-admin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!--  引入druid starter-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-boot-starter</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

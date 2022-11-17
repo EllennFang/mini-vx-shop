@@ -1,0 +1,28 @@
+server:
+  port: 10086
+spring:
+  application:
+    #服务名称
+    name: admin-server
+eureka:
+  client:
+    #指定注册中心地址
+    service-url:
+      defaultZone: http://admin:admin@localhost:8761/eureka
+    fetch-registry: true  #拉取注册服务列表
+    register-with-eureka: true  #向eureka服务中注册服务
+  #eureka实例设置
+  instance:
+    #服务器名称
+    hostname: localhost
+    #实例标识
+    instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}
+    #显示IP地址
+    prefer-ip-address: true
+    #实体续约时间周期，单位秒
+    lease-renewal-interval-in-seconds: 5
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露监控等端点，让admin可以给你发心跳检测

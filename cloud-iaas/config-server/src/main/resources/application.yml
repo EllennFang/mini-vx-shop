@@ -1,0 +1,46 @@
+server:
+  port: 8888
+spring:
+  application:
+    #应用名称
+    name: config-server
+  cloud:
+    config:
+      #配置中心需要与gitee配合使用
+      server:
+        #指定远程配置中心参数
+        git:
+          #远程配置中心仓库
+          uri: https://gitee.com/ayguoxin/powershop.git
+          #远程仓库登录用户名
+          username: 3076288199@qq.com
+          #远程仓库登录密码
+          password: dlguoxin2009
+          search-paths: /**   #搜索配置文件的根目录
+          basedir: D:\course\23-shop-projects\shop-local-config #缓存到本地配置文件的地址
+
+  rabbitmq:
+    host: 192.168.84.128
+    port: 5672
+    username: shop
+    password: 123456
+    virtual-host: /v-shop
+
+#eureka配置
+eureka:
+  client:
+    service-url:
+      #指定注册中心地址
+      defaultZone: http://admin:admin@localhost:8761/eureka
+    fetch-registry: true  #向注册中心拉取服务列表
+    register-with-eureka: true  #向eureka服务中注册服务
+  instance:
+    hostname: localhost
+    instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5 #实例续约时间
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露监控等端点，让admin可以给你发心跳检测

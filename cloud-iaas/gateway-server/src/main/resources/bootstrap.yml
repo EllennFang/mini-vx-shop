@@ -1,0 +1,40 @@
+spring:
+  application:
+    #应用名称
+    name: gateway-server
+  #使用远程配置中心
+  cloud:
+    config:
+      discovery:
+        #配置文件中心的应用名称
+        service-id: config-server
+        #开启服务发现
+        enabled: true
+      #配置文件名称
+      name: gateway-server
+      #指定配置文件环境
+      profile: dev
+      #git分支
+      label: master
+#eureka配置
+eureka:
+  client:
+    service-url:
+      #指定eureka注册中心地址
+      defaultZone: http://admin:admin@localhost:8761/eureka
+    #从注册中心拉取服务列表
+    fetch-registry: true
+    #向注册中心注册服务
+    register-with-eureka: true
+    #表示eureka client间隔多久去拉取服务注册信息，默认为30秒
+    registry-fetch-interval-seconds: 3
+  #eureka实例配置
+  instance:
+    #主机名称
+    hostname: localhost
+    #显示IP地址
+    prefer-ip-address: true
+    #实例标识名称
+    instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}
+    #实例续约时间间隔
+    lease-renewal-interval-in-seconds: 5
