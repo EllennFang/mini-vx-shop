@@ -16,11 +16,11 @@ spring:
           username: 3076288199@qq.com
           #远程仓库登录密码
           password: dlguoxin2009
-          search-paths: /**   #搜索配置文件的根目录
-          basedir: D:\course\23-shop-projects\shop-local-config #缓存到本地配置文件的地址
+          search-paths: /shop-local-config/**   #搜索配置文件的根目录
+          basedir: D:\course\18-MicrProject\04-code\shop-config #缓存到本地配置文件的地址
 
   rabbitmq:
-    host: 192.168.84.128
+    host: 192.168.188.142
     port: 5672
     username: shop
     password: 123456
