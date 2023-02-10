@@ -9,9 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "后台管理接口管理")
 @RequestMapping("sys/user")
@@ -39,5 +37,13 @@ public class SysUserController {
     public ResponseEntity<Page<SysUser>> loadSysUserPage(Page<SysUser> page,SysUser sysUser) {
         page = sysUserService.selectSysUserPage(page,sysUser);
         return ResponseEntity.ok(page);
+    }
+
+    @ApiOperation("新增管理员")
+    @PostMapping
+    @PreAuthorize("hasAuthority('sys:user:save')")
+    public ResponseEntity<Void> saveSysUser(@RequestBody SysUser sysUser) {
+        sysUserService.save(sysUser);
+        return ResponseEntity.ok().build();
     }
 }

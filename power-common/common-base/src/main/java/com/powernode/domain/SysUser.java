@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 /**
     * 系统用户
@@ -51,7 +53,7 @@ public class SysUser implements Serializable {
      * 状态  0：禁用   1：正常
      */
     @TableField(value = "status")
-    private Byte status;
+    private Integer status;
 
     /**
      * 创建者ID
@@ -70,6 +72,10 @@ public class SysUser implements Serializable {
      */
     @TableField(value = "shop_id")
     private Long shopId;
+
+    ///////////////新增管理员////////////////
+    @TableField(exist = false)
+    private List<Long> roleIdList;
 
     private static final long serialVersionUID = 1L;
 }

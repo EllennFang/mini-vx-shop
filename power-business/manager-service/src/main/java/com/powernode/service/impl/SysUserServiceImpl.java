@@ -4,17 +4,30 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.powernode.domain.SysUser;
+import com.powernode.domain.SysUserRole;
 import com.powernode.mapper.SysUserMapper;
+import com.powernode.service.SysUserRoleService;
 import com.powernode.service.SysUserService;
+import com.powernode.utils.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService{
 
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private SysUserRoleService sysUserRoleService;
 
     @Override
     public Page<SysUser> selectSysUserPage(Page<SysUser> page, SysUser sysUser) {
@@ -26,5 +39,36 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 // username like '%'#{sysUser.username}'%'
                 // </if>
         );
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean save(SysUser sysUser) {
+        //新增管理员
+        //密码加密
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        sysUser.setPassword(passwordEncoder.encode(sysUser.getPassword()));
+        sysUser.setCreateTime(new Date());
+        sysUser.setCreateUserId(Long.valueOf(AuthUtil.getLoginUserId()));
+        int i = sysUserMapper.insert(sysUser);
+        if (i > 0) {
+            //获取用户角色id集合
+            List<Long> roleIdList = sysUser.getRoleIdList();
+            //判断是否有角色
+            if (!CollectionUtils.isEmpty(roleIdList) && roleIdList.size() != 0) {
+                //新增用户角色记录
+                List<SysUserRole> sysUserRoleList = new ArrayList<>();
+                //循环遍历用户角色id集合
+                roleIdList.forEach(roleId -> {
+                    SysUserRole sysUserRole = new SysUserRole();
+                    sysUserRole.setRoleId(roleId);
+                    sysUserRole.setUserId(sysUser.getUserId());
+                    sysUserRoleList.add(sysUserRole);
+                });
+                sysUserRoleService.saveBatch(sysUserRoleList);
+            }
+        }
+        return i>0;
     }
 }
