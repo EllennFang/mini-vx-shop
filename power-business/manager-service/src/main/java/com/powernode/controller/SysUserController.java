@@ -1,5 +1,6 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.SysUser;
 import com.powernode.service.SysUserService;
 import com.powernode.utils.AuthUtil;
@@ -28,5 +29,13 @@ public class SysUserController {
         SysUser sysUser = sysUserService.getById(userId);
 
         return ResponseEntity.ok(sysUser);
+    }
+
+//    sys/user/page
+    @ApiOperation("多条件分页查询管理员列表")
+    @GetMapping("page")
+    public ResponseEntity<Page<SysUser>> loadSysUserPage(Page<SysUser> page,SysUser sysUser) {
+        page = sysUserService.selectSysUserPage(page,sysUser);
+        return ResponseEntity.ok(page);
     }
 }
