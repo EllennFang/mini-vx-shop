@@ -55,4 +55,12 @@ public class SysUserController {
         SysUser sysUser = sysUserService.getById(id);
         return ResponseEntity.ok(sysUser);
     }
+
+    @ApiOperation("修改管理员信息")
+    @PutMapping
+    @PreAuthorize("hasAuthority('sys:user:update')")
+    public ResponseEntity<Void> updateSysUser(@RequestBody SysUser sysUser) {
+        sysUserService.updateById(sysUser);
+        return ResponseEntity.ok().build();
+    }
 }

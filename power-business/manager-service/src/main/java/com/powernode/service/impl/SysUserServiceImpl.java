@@ -92,4 +92,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         return sysUser;
     }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean updateById(SysUser sysUser) {
+        //如果密码有值，即修改密码，否则密码不变
+        String password = sysUser.getPassword();
+        //判断是否有值
+        if (StringUtils.hasText(password)) {
+            //修改原有来的密码
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            sysUser.setPassword(passwordEncoder.encode(password));
+        }
+        //删除管理员原有的角色
+        sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getUserId,sysUser.getUserId())
+        );
+
+        //获取用户角色id集合
+        List<Long> roleIdList = sysUser.getRoleIdList();
+        //判断是否有角色
+        if (!CollectionUtils.isEmpty(roleIdList) && roleIdList.size() != 0) {
+            //新增用户角色记录
+            List<SysUserRole> sysUserRoleList = new ArrayList<>();
+            //循环遍历用户角色id集合
+            roleIdList.forEach(roleId -> {
+                SysUserRole sysUserRole = new SysUserRole();
+                sysUserRole.setRoleId(roleId);
+                sysUserRole.setUserId(sysUser.getUserId());
+                sysUserRoleList.add(sysUserRole);
+            });
+            sysUserRoleService.saveBatch(sysUserRoleList);
+        }
+
+        return sysUserMapper.updateById(sysUser)>0;
+    }
 }

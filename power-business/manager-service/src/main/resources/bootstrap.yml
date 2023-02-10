@@ -23,6 +23,10 @@ spring:
     #统一处理后端响应给前端的时间参数格式
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+mybatis-plus:
+  global-config:
+    db-config:
+      update-strategy: not_empty
 eureka:
   client:
     service-url:
