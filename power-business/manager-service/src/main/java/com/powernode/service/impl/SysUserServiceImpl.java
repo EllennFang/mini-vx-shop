@@ -87,7 +87,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         //判断是否有值
         if (!CollectionUtils.isEmpty(sysUserRoleList) && sysUserRoleList.size() != 0) {
             //获取角色id集合
-            List<Long> roleIdList = sysUserRoleList.stream().map(SysUserRole::getUserId).collect(Collectors.toList());
+            List<Long> roleIdList = sysUserRoleList.stream().map(SysUserRole::getRoleId).collect(Collectors.toList());
             sysUser.setRoleIdList(roleIdList);
         }
         return sysUser;
