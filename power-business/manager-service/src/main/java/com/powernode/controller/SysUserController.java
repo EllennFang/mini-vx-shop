@@ -46,4 +46,13 @@ public class SysUserController {
         sysUserService.save(sysUser);
         return ResponseEntity.ok().build();
     }
+
+//    sys/user/info/8
+    @ApiOperation("查询管理员详情")
+    @GetMapping("info/{id}")
+    @PreAuthorize("hasAuthority('sys:user:info')")
+    public ResponseEntity<SysUser> loadSysUserInfo(@PathVariable Long id) {
+        SysUser sysUser = sysUserService.getById(id);
+        return ResponseEntity.ok(sysUser);
+    }
 }

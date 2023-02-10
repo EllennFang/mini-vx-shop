@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.powernode.domain.SysUser;
 import com.powernode.domain.SysUserRole;
 import com.powernode.mapper.SysUserMapper;
+import com.powernode.mapper.SysUserRoleMapper;
 import com.powernode.service.SysUserRoleService;
 import com.powernode.service.SysUserService;
 import com.powernode.utils.AuthUtil;
@@ -16,15 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements SysUserService{
 
     @Autowired
     private SysUserMapper sysUserMapper;
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     @Autowired
     private SysUserRoleService sysUserRoleService;
@@ -70,5 +75,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             }
         }
         return i>0;
+    }
+
+    @Override
+    public SysUser getById(Serializable id) {
+        SysUser sysUser = sysUserMapper.selectById(id);
+        //根据用户标识查询角色集合
+        List<SysUserRole> sysUserRoleList = sysUserRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
+                .eq(SysUserRole::getUserId, id)
+        );
+        //判断是否有值
+        if (!CollectionUtils.isEmpty(sysUserRoleList) && sysUserRoleList.size() != 0) {
+            //获取角色id集合
+            List<Long> roleIdList = sysUserRoleList.stream().map(SysUserRole::getUserId).collect(Collectors.toList());
+            sysUser.setRoleIdList(roleIdList);
+        }
+        return sysUser;
     }
 }
