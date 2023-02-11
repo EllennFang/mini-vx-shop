@@ -1,21 +1,23 @@
 package com.powernode.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.powernode.constant.MenuConstant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.powernode.constant.MenuConstant;
 import com.powernode.domain.SysMenu;
 import com.powernode.mapper.SysMenuMapper;
 import com.powernode.service.SysMenuService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
+@CacheConfig(cacheNames = "com.powernode.service.impl.SysMenuServiceImpl")
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> implements SysMenuService{
 
     @Autowired
@@ -78,5 +80,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 .collect(Collectors.toList());
         root.forEach(r -> r.setList(transformTree(sysMenuList,r.getMenuId())));
         return root;
+    }
+
+    @Override
+    @Cacheable(key = MenuConstant.ALL_MENU_LIST)
+    public List<SysMenu> list() {
+        return sysMenuMapper.selectList(null);
     }
 }

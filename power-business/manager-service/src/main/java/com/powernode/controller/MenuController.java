@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,5 +47,14 @@ public class MenuController {
         menuAndAuth.setMenuList(sysMenuList);
 
         return ResponseEntity.ok(menuAndAuth);
+    }
+
+//    sys/menu/table
+    @ApiOperation("查询权限集合")
+    @GetMapping("table")
+    @PreAuthorize("hasAuthority('sys:menu:list')")
+    public ResponseEntity<List<SysMenu>> loadSysMenuList() {
+        List<SysMenu> list = sysMenuService.list();
+        return ResponseEntity.ok(list);
     }
 }
