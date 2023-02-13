@@ -7,6 +7,7 @@ import com.powernode.domain.SysUser;
 import com.powernode.service.SysLogService;
 import com.powernode.service.SysUserService;
 import com.powernode.utils.AuthUtil;
+import com.powernode.utils.ManagerThreadPool;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -63,19 +64,23 @@ public class LogAspect {
         long execTime = end - start;
         //获取用户id
         String userId = AuthUtil.getLoginUserId();
-        //根据用户标识查询用户信息
-        SysUser sysUser = sysUserService.getById(userId);
-        //创建操作形为日志对象
-        SysLog sysLog = SysLog.builder()
-                .createDate(new Date())
-                .ip(remoteHost)
-                .method(methodName)
-                .operation(operation)
-                .params(args == null ? "" : JSON.toJSONString(args))
-                .time(execTime)
-                .username(sysUser.getUsername()).build();
-        //插入形为日志
-        sysLogService.save(sysLog);
+        //创建多线程
+        ManagerThreadPool.poolExecutor.execute(() -> {
+            //根据用户标识查询用户信息
+            SysUser sysUser = sysUserService.getById(userId);
+            //创建操作形为日志对象
+            SysLog sysLog = SysLog.builder()
+                    .createDate(new Date())
+                    .ip(remoteHost)
+                    .method(methodName)
+                    .operation(operation)
+                    .params(args == null ? "" : JSON.toJSONString(args))
+                    .time(execTime)
+                    .username(sysUser.getUsername()).build();
+            //插入形为日志
+            sysLogService.save(sysLog);
+
+        });
 
 
         return result;
