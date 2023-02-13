@@ -1,6 +1,7 @@
 package com.powernode.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.powernode.anno.Log;
 import com.powernode.domain.SysUser;
 import com.powernode.service.SysUserService;
 import com.powernode.utils.AuthUtil;
@@ -44,6 +45,7 @@ public class SysUserController {
     @ApiOperation("新增管理员")
     @PostMapping
     @PreAuthorize("hasAuthority('sys:user:save')")
+    @Log(operation = "新增管理员")
     public ResponseEntity<Void> saveSysUser(@RequestBody SysUser sysUser) {
         sysUserService.save(sysUser);
         return ResponseEntity.ok().build();
@@ -61,6 +63,7 @@ public class SysUserController {
     @ApiOperation("修改管理员信息")
     @PutMapping
     @PreAuthorize("hasAuthority('sys:user:update')")
+    @Log(operation = "修改管理员信息")
     public ResponseEntity<Void> updateSysUser(@RequestBody SysUser sysUser) {
         sysUserService.updateById(sysUser);
         return ResponseEntity.ok().build();
@@ -70,6 +73,7 @@ public class SysUserController {
     @ApiOperation("批量删除管理员")
     @DeleteMapping("{ids}")
     @PreAuthorize("hasAuthority('sys:user:delete')")
+    @Log(operation = "批量删除管理员")
     public ResponseEntity<Void> deleteSysUser(@PathVariable List<Long> ids) {
         sysUserService.removeByIds(ids);
         return ResponseEntity.ok().build();

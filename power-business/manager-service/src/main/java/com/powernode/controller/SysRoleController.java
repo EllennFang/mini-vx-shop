@@ -1,6 +1,7 @@
 package com.powernode.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.powernode.anno.Log;
 import com.powernode.domain.SysRole;
 import com.powernode.service.SysRoleService;
 import io.swagger.annotations.Api;
@@ -41,6 +42,7 @@ public class SysRoleController {
     @ApiOperation("新增角色")
     @PostMapping
     @PreAuthorize("hasAuthority('sys:role:save')")
+    @Log(operation = "新增角色")
     public ResponseEntity<Void> saveSysRole(@RequestBody SysRole sysRole) {
         sysRoleService.save(sysRole);
         return ResponseEntity.ok().build();
@@ -49,6 +51,7 @@ public class SysRoleController {
     @ApiOperation("修改角色")
     @PutMapping
     @PreAuthorize("hasAuthority('sys:role:update')")
+    @Log(operation = "修改角色")
     public ResponseEntity<Void> updateSysRole(@RequestBody SysRole sysRole) {
         sysRoleService.updateById(sysRole);
         return ResponseEntity.ok().build();
@@ -67,6 +70,7 @@ public class SysRoleController {
     @ApiOperation("批量删除角色")
     @DeleteMapping
     @PreAuthorize("hasAuthority('sys:role:delete')")
+    @Log(operation = "批量删除角色")
     public ResponseEntity<Void> deleteSysRoleList(@RequestBody List<Long> roleIdList) {
         sysRoleService.removeByIds(roleIdList);
         return ResponseEntity.ok().build();
