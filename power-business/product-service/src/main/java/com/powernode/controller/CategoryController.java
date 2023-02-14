@@ -46,4 +46,21 @@ public class CategoryController {
         categoryService.save(category);
         return ResponseEntity.ok().build();
     }
+
+//    prod/category/info/99
+    @ApiOperation("根据标识查询类目详情")
+    @GetMapping("info/{categoryId}")
+    @PreAuthorize("hasAuthority('prod:category:info')")
+    public ResponseEntity<Category> loadCategoryInfo(@PathVariable Long categoryId) {
+        Category category = categoryService.getById(categoryId);
+        return ResponseEntity.ok(category);
+    }
+
+    @ApiOperation("修改商品类目信息")
+    @PutMapping
+    @PreAuthorize("hasAuthority('prod:category:update')")
+    public ResponseEntity<Void> updateCategory(@RequestBody Category category) {
+        categoryService.updateById(category);
+        return ResponseEntity.ok().build();
+    }
 }

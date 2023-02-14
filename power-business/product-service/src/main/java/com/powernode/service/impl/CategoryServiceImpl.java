@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -49,5 +50,32 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         category.setUpdateTime(new Date());
         category.setShopId(1L);
         return categoryMapper.insert(category)>0;
+    }
+
+    @Override
+    @CacheEvict(key = CategoryConstant.CATEGORY_LIST)
+    public boolean updateById(Category category) {
+
+        //获取当前类目原有的级别
+        Category oldCategory = categoryMapper.selectById(category.getCategoryId());
+        Integer oldGrade = oldCategory.getGrade();
+        //获取当前级别
+        Integer nowGrade = category.getGrade();
+        category.setUpdateTime(new Date());
+        //判断类目是否修改级别
+        if (oldGrade == 1 && nowGrade == 2) {
+            //1变2，查询原来一级类目下没有子类目才可变更
+            List<Category> child = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
+                    .eq(Category::getParentId, oldCategory.getCategoryId())
+            );
+            if (!CollectionUtils.isEmpty(child) && child.size() != 0) {
+                throw new RuntimeException("不可修改");
+            }
+        } else {
+            //2变1
+            category.setParentId(0L);
+        }
+
+        return categoryMapper.updateById(category)>0;
     }
 }
