@@ -12,8 +12,10 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -77,5 +79,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         }
 
         return categoryMapper.updateById(category)>0;
+    }
+
+    @Override
+    @CacheEvict(key = CategoryConstant.CATEGORY_LIST)
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean removeById(Serializable id) {
+        //根据标识查询类目详情
+        Category category = categoryMapper.selectById(id);
+        //判断是否为一级类目
+        if (category.getGrade() == 1) {
+            //删除其子类目
+            categoryMapper.delete(new LambdaQueryWrapper<Category>()
+                    .eq(Category::getParentId,id)
+            );
+        }
+        return categoryMapper.deleteById(id)>0;
     }
 }

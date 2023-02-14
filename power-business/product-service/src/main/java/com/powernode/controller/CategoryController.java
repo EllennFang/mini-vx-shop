@@ -63,4 +63,13 @@ public class CategoryController {
         categoryService.updateById(category);
         return ResponseEntity.ok().build();
     }
+
+//    prod/category/93
+    @ApiOperation("删除商品类目")
+    @DeleteMapping("{categoryId}")
+    @PreAuthorize("hasAuthority('prod:category:delete')")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
+        categoryService.removeById(categoryId);
+        return ResponseEntity.ok().build();
+    }
 }
