@@ -1,5 +1,6 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.powernode.domain.Category;
 import com.powernode.service.CategoryService;
 import io.swagger.annotations.Api;
@@ -27,5 +28,16 @@ public class CategoryController {
     public ResponseEntity<List<Category>> loadCategoryList() {
         List<Category> list = categoryService.list();
         return ResponseEntity.ok(list);
+    }
+
+//    prod/category/listCategory
+    @ApiOperation("查询商品一级类目集合")
+    @GetMapping("listCategory")
+    @PreAuthorize("hasAuthority('prod:category:page')")
+    public ResponseEntity<List<Category>> loadRootCategoryList() {
+        List<Category> root = categoryService.list(new LambdaQueryWrapper<Category>()
+                .eq(Category::getParentId, 0)
+        );
+        return ResponseEntity.ok(root);
     }
 }
