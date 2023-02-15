@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,5 +27,14 @@ public class ProdCommController {
     public ResponseEntity<Page<ProdComm>> loadProdCommPage(Page<ProdComm> page,ProdComm prodComm) {
         page = prodCommService.selectProdCommPage(page,prodComm);
         return ResponseEntity.ok(page);
+    }
+
+//    prod/prodComm/1
+    @ApiOperation("根据标识查询评论详情")
+    @GetMapping("{commId}")
+    @PreAuthorize("hasAuthority('prod:prodComm:info')")
+    public ResponseEntity<ProdComm> loadProdCommInfo(@PathVariable Long commId) {
+        ProdComm prodComm = prodCommService.getById(commId);
+        return ResponseEntity.ok(prodComm);
     }
 }
