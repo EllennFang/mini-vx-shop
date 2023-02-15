@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
+
 @Service
 public class ProdTagServiceImpl extends ServiceImpl<ProdTagMapper, ProdTag> implements ProdTagService{
 
@@ -26,5 +28,15 @@ public class ProdTagServiceImpl extends ServiceImpl<ProdTagMapper, ProdTag> impl
                 .like(StringUtils.hasText(prodTag.getTitle()),ProdTag::getTitle,prodTag.getTitle())
                 .orderByDesc(ProdTag::getSeq)
         );
+    }
+
+    @Override
+    public boolean save(ProdTag prodTag) {
+        prodTag.setCreateTime(new Date());
+        prodTag.setUpdateTime(new Date());
+        prodTag.setShopId(1L);
+        prodTag.setIsDefault(1);
+        prodTag.setProdCount(0L);
+        return prodTagMapper.insert(prodTag)>0;
     }
 }

@@ -8,9 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "分组标签接口管理")
 @RequestMapping("prod/prodTag")
@@ -26,5 +24,13 @@ public class ProdTagController {
     public ResponseEntity<Page<ProdTag>> loadProdTagPage(Page<ProdTag> page,ProdTag prodTag) {
         page = prodTagService.selectProdTagPage(page,prodTag);
         return ResponseEntity.ok(page);
+    }
+
+    @ApiOperation("新增商品分组标签")
+    @PostMapping
+    @PreAuthorize("hasAuthority('prod:prodTag:save')")
+    public ResponseEntity<Void> saveProdTag(@RequestBody ProdTag prodTag) {
+        prodTagService.save(prodTag);
+        return ResponseEntity.ok().build();
     }
 }
