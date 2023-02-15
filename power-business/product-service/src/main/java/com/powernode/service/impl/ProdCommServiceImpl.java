@@ -13,7 +13,11 @@ import com.powernode.service.ProdCommService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,5 +74,21 @@ public class ProdCommServiceImpl extends ServiceImpl<ProdCommMapper, ProdComm> i
         }
 
         return page;
+    }
+
+    @Override
+    public boolean updateById(ProdComm prodComm) {
+        //获取评论内容
+        String content = prodComm.getContent();
+        if (StringUtils.hasText(content)) {
+            prodComm.setReplyTime(new Date());
+            prodComm.setReplySts(1);
+        }
+        //获取ip地址
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = requestAttributes.getRequest();
+        String remoteHost = request.getRemoteHost();
+        prodComm.setPostip(remoteHost);
+        return prodCommMapper.updateById(prodComm)>0;
     }
 }
