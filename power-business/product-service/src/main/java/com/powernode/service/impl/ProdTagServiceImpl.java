@@ -39,4 +39,10 @@ public class ProdTagServiceImpl extends ServiceImpl<ProdTagMapper, ProdTag> impl
         prodTag.setProdCount(0L);
         return prodTagMapper.insert(prodTag)>0;
     }
+
+    @Override
+    public boolean updateById(ProdTag prodTag) {
+        prodTag.setUpdateTime(new Date());
+        return prodTagMapper.updateById(prodTag)>0;
+    }
 }
