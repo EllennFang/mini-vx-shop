@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -32,13 +34,17 @@ public class ProdProp implements Serializable {
      * ProdPropRule 1:销售属性(规格); 2:参数属性;
      */
     @TableField(value = "rule")
-    private Byte rule;
+    private Integer rule;
 
     /**
      * 店铺id
      */
     @TableField(value = "shop_id")
     private Long shopId;
+
+    ///////////////分页查询//////////////
+    @TableField(exist = false)
+    private List<ProdPropValue> prodPropValues;
 
     private static final long serialVersionUID = 1L;
 }
