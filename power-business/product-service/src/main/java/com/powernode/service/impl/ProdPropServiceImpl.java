@@ -9,8 +9,10 @@ import com.powernode.domain.ProdPropValue;
 import com.powernode.mapper.ProdPropMapper;
 import com.powernode.mapper.ProdPropValueMapper;
 import com.powernode.service.ProdPropService;
+import com.powernode.service.ProdPropValueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -24,6 +26,9 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
 
     @Autowired
     private ProdPropValueMapper prodPropValueMapper;
+
+    @Autowired
+    private ProdPropValueService prodPropValueService;
 
 
     @Override
@@ -54,5 +59,31 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
             prodProp1.setProdPropValues(prodPropValues);
         });
         return page;
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean save(ProdProp prodProp) {
+        //新增商品属性
+        prodProp.setRule(2);
+        prodProp.setShopId(1L);
+        int i = prodPropMapper.insert(prodProp);
+        if (i > 0) {
+            //新增商品属性值
+            //获取商品属性值集合对象
+            List<ProdPropValue> prodPropValueList = prodProp.getProdPropValues();
+            if (CollectionUtil.isEmpty(prodPropValueList) || prodPropValueList.size() == 0) {
+                throw new RuntimeException("服务器开小差了");
+            }
+            Long propId = prodProp.getPropId();
+            //循环遍历
+            prodPropValueList.forEach(prodPropValue -> {
+                prodPropValue.setPropId(propId);
+            });
+            //批量添加商品属性值集合
+            prodPropValueService.saveBatch(prodPropValueList);
+        }
+
+        return i>0;
     }
 }
