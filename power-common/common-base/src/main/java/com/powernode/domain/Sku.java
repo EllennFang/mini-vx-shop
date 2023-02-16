@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
     * 单品SKU表
@@ -127,13 +128,13 @@ public class Sku implements Serializable {
      * 0 禁用 1 启用
      */
     @TableField(value = "status")
-    private Byte status;
+    private Integer status;
 
     /**
      * 0 正常 1 已被删除
      */
     @TableField(value = "is_delete")
-    private Byte isDelete;
+    private Integer isDelete;
 
     private static final long serialVersionUID = 1L;
 }
