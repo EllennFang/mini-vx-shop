@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,5 +105,15 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
         prodPropValueService.saveBatch(prodPropValueList);
 
         return prodPropMapper.updateById(prodProp)>0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean removeById(Serializable id) {
+        //删除属性值
+        prodPropValueMapper.delete(new LambdaQueryWrapper<ProdPropValue>()
+                .eq(ProdPropValue::getPropId,id)
+        );
+        return prodPropMapper.deleteById(id)>0;
     }
 }

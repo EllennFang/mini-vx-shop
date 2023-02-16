@@ -43,4 +43,12 @@ public class ProdSpecController {
         prodPropService.updateById(prodProp);
         return ResponseEntity.ok().build();
     }
+
+    @ApiOperation("删除商品规格")
+    @DeleteMapping("{propId}")
+    @PreAuthorize("hasAuthority('prod:spec:delete')")
+    public ResponseEntity<Void> deleteProdSpec(@PathVariable Long propId) {
+        prodPropService.removeById(propId);
+        return ResponseEntity.ok().build();
+    }
 }
