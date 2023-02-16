@@ -35,4 +35,12 @@ public class ProdSpecController {
         prodPropService.save(prodProp);
         return ResponseEntity.ok().build();
     }
+
+    @ApiOperation("修改商品规格")
+    @PutMapping
+    @PreAuthorize("hasAuthority('prod:spec:update')")
+    public ResponseEntity<Void> updateProdSpec(@RequestBody ProdProp prodProp) {
+        prodPropService.updateById(prodProp);
+        return ResponseEntity.ok().build();
+    }
 }

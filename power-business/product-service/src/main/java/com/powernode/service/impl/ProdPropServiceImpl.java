@@ -86,4 +86,23 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
 
         return i>0;
     }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean updateById(ProdProp prodProp) {
+        Long propId = prodProp.getPropId();
+        //获取商品属性值集合
+        List<ProdPropValue> prodPropValueList = prodProp.getProdPropValues();
+        if (CollectionUtil.isEmpty(prodPropValueList) || prodPropValueList.size() == 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+        //删除原有的商品属性值集合
+        prodPropValueMapper.delete(new LambdaQueryWrapper<ProdPropValue>()
+                .eq(ProdPropValue::getPropId,propId)
+        );
+        //批量添加商品属性值集合
+        prodPropValueService.saveBatch(prodPropValueList);
+
+        return prodPropMapper.updateById(prodProp)>0;
+    }
 }
