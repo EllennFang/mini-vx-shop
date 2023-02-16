@@ -10,6 +10,8 @@ import com.powernode.domain.Prod;
 import com.powernode.domain.ProdTagReference;
 import com.powernode.domain.Sku;
 import com.powernode.mapper.ProdMapper;
+import com.powernode.mapper.ProdTagReferenceMapper;
+import com.powernode.mapper.SkuMapper;
 import com.powernode.service.ProdService;
 import com.powernode.service.ProdTagReferenceService;
 import com.powernode.service.SkuService;
@@ -18,15 +20,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements ProdService{
 
     @Autowired
     private ProdMapper prodMapper;
+
+    @Autowired
+    private SkuMapper skuMapper;
+
+    @Autowired
+    private ProdTagReferenceMapper prodTagReferenceMapper;
 
     @Autowired
     private SkuService skuService;
@@ -107,5 +117,34 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
 
         return i > 0;
+    }
+
+    @Override
+    public Prod getById(Serializable id) {
+        //根据标识查询商品详情
+        Prod prod = prodMapper.selectById(id);
+        //根据商品标识查询商品与分组标签关系集合
+        List<ProdTagReference> prodTagReferenceList = prodTagReferenceMapper.selectList(new LambdaQueryWrapper<ProdTagReference>()
+                .eq(ProdTagReference::getProdId, id)
+        );
+        //判断是否有值
+        if (CollectionUtil.isNotEmpty(prodTagReferenceList) && prodTagReferenceList.size() != 0) {
+            //从商品与分组标签关系集合中获取分组标签关系id集合
+            List<Long> tagIdList = prodTagReferenceList.stream().map(ProdTagReference::getTagId).collect(Collectors.toList());
+            prod.setTagList(tagIdList);
+        }
+        //根据商品标识查询商品sku对象集合
+        List<Sku> skuList = skuMapper.selectList(new LambdaQueryWrapper<Sku>()
+                .eq(Sku::getProdId, id)
+        );
+        if (CollectionUtil.isNotEmpty(skuList) && skuList.size() != 0) {
+            skuList.forEach(sku -> {
+                sku.setStocks(sku.getActualStocks());
+            });
+            prod.setSkuList(skuList);
+        }
+
+
+        return prod;
     }
 }

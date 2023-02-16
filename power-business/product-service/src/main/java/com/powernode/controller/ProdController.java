@@ -33,4 +33,13 @@ public class ProdController {
         prodService.save(prod);
         return ResponseEntity.ok().build();
     }
+
+//    prod/prod/info/99
+    @ApiOperation("根据标识查询商品详情")
+    @GetMapping("info/{prodId}")
+    @PreAuthorize("hasAuthority('prod:prod:info')")
+    public ResponseEntity<Prod> loadProdInfo(@PathVariable Long prodId) {
+        Prod prod = prodService.getById(prodId);
+        return ResponseEntity.ok(prod);
+    }
 }
