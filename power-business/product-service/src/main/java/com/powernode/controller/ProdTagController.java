@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "分组标签接口管理")
 @RequestMapping("prod/prodTag")
 @RestController
@@ -57,5 +59,14 @@ public class ProdTagController {
     public ResponseEntity<Void> deleteProdTag(@PathVariable Long tagId) {
         prodTagService.removeById(tagId);
         return ResponseEntity.ok().build();
+    }
+
+//    prod/prodTag/listTagList
+    @ApiOperation("查询商品分组标签集合")
+    @GetMapping("listTagList")
+    @PreAuthorize("hasAuthority('prod:prodTag:page')")
+    public ResponseEntity<List<ProdTag>> loadProdTagList() {
+        List<ProdTag> list = prodTagService.list();
+        return ResponseEntity.ok(list);
     }
 }
