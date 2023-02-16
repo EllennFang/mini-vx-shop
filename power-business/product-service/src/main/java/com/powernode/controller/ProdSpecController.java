@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "商品规则接口管理")
 @RequestMapping("prod/spec")
 @RestController
@@ -50,5 +52,14 @@ public class ProdSpecController {
     public ResponseEntity<Void> deleteProdSpec(@PathVariable Long propId) {
         prodPropService.removeById(propId);
         return ResponseEntity.ok().build();
+    }
+
+//    prod/spec/list
+    @ApiOperation("查询商品规格属性集合")
+    @GetMapping("list")
+    @PreAuthorize("hasAuthority('prod:spec:page')")
+    public ResponseEntity<List<ProdProp>> loadProdPropList() {
+        List<ProdProp> list = prodPropService.list();
+        return ResponseEntity.ok(list);
     }
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.powernode.constant.ProdSpecConstant;
 import com.powernode.domain.ProdProp;
 import com.powernode.domain.ProdPropValue;
 import com.powernode.mapper.ProdPropMapper;
@@ -11,6 +12,9 @@ import com.powernode.mapper.ProdPropValueMapper;
 import com.powernode.service.ProdPropService;
 import com.powernode.service.ProdPropValueService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@CacheConfig(cacheNames = "com.powernode.service.impl.ProdPropServiceImpl")
 public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> implements ProdPropService{
 
     @Autowired
@@ -63,6 +68,7 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
     }
 
     @Override
+    @CacheEvict(key = ProdSpecConstant.PROD_PROP_LIST)
     @Transactional(rollbackFor = RuntimeException.class)
     public boolean save(ProdProp prodProp) {
         //新增商品属性
@@ -89,6 +95,7 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
     }
 
     @Override
+    @CacheEvict(key = ProdSpecConstant.PROD_PROP_LIST)
     @Transactional(rollbackFor = RuntimeException.class)
     public boolean updateById(ProdProp prodProp) {
         Long propId = prodProp.getPropId();
@@ -108,6 +115,7 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
     }
 
     @Override
+    @CacheEvict(key = ProdSpecConstant.PROD_PROP_LIST)
     @Transactional(rollbackFor = RuntimeException.class)
     public boolean removeById(Serializable id) {
         //删除属性值
@@ -115,5 +123,11 @@ public class ProdPropServiceImpl extends ServiceImpl<ProdPropMapper, ProdProp> i
                 .eq(ProdPropValue::getPropId,id)
         );
         return prodPropMapper.deleteById(id)>0;
+    }
+
+    @Override
+    @Cacheable(key = ProdSpecConstant.PROD_PROP_LIST)
+    public List<ProdProp> list() {
+        return prodPropMapper.selectList(null);
     }
 }
