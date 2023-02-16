@@ -1,8 +1,11 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.ProdProp;
+import com.powernode.domain.ProdPropValue;
 import com.powernode.service.ProdPropService;
+import com.powernode.service.ProdPropValueService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,9 @@ public class ProdSpecController {
 
     @Autowired
     private ProdPropService prodPropService;
+
+    @Autowired
+    private ProdPropValueService prodPropValueService;
 
 
     @ApiOperation("多条件分页查询商品规格列表")
@@ -61,5 +67,16 @@ public class ProdSpecController {
     public ResponseEntity<List<ProdProp>> loadProdPropList() {
         List<ProdProp> list = prodPropService.list();
         return ResponseEntity.ok(list);
+    }
+
+//    prod/spec/listSpecValue/81
+    @ApiOperation("根据属性标识查询属性值集合")
+    @GetMapping("listSpecValue/{propId}")
+    @PreAuthorize("hasAuthority('prod:spec:page')")
+    public ResponseEntity<List<ProdPropValue>> loadProdPropValueList(@PathVariable Long propId) {
+        List<ProdPropValue> prodPropValueList = prodPropValueService.list(new LambdaQueryWrapper<ProdPropValue>()
+                .eq(ProdPropValue::getPropId, propId)
+        );
+        return ResponseEntity.ok(prodPropValueList);
     }
 }
