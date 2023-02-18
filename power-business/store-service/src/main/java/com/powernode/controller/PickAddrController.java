@@ -8,9 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "自提点接口管理")
 @RequestMapping("shop/pickAddr")
@@ -26,5 +24,13 @@ public class PickAddrController {
     public ResponseEntity<Page<PickAddr>> loadPickAddrPage(Page<PickAddr> page,PickAddr pickAddr) {
         page = pickAddrService.selectPickAddrPage(page,pickAddr);
         return ResponseEntity.ok(page);
+    }
+
+    @ApiOperation("新增自提点地址")
+    @PostMapping
+    @PreAuthorize("hasAuthority('shop:pickAddr:save')")
+    public ResponseEntity<Void> savePickAddr(@RequestBody PickAddr pickAddr) {
+        pickAddrService.save(pickAddr);
+        return ResponseEntity.ok().build();
     }
 }
