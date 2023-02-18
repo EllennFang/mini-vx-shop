@@ -42,4 +42,12 @@ public class ProdController {
         Prod prod = prodService.getById(prodId);
         return ResponseEntity.ok(prod);
     }
+
+    @ApiOperation("修改商品信息")
+    @PutMapping
+    @PreAuthorize("hasAuthority('prod:prod:update')")
+    public ResponseEntity<Void> updateProd(@RequestBody Prod prod) {
+        prodService.updateById(prod);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -147,4 +147,63 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         return prod;
     }
+
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean updateById(Prod prod) {
+        Long prodId = prod.getProdId();
+        //删除商品原有的分组标签
+        prodTagReferenceMapper.delete(new LambdaQueryWrapper<ProdTagReference>()
+                .eq(ProdTagReference::getProdId,prodId)
+        );
+        //删除商品原有的sku
+        skuMapper.delete(new LambdaQueryWrapper<Sku>()
+                .eq(Sku::getProdId,prodId)
+        );
+
+        //新增商品与分组标签的关系记录
+        List<Long> tagIdList = prod.getTagList();
+        //判断是否有值
+        if (CollectionUtil.isNotEmpty(tagIdList) && tagIdList.size() != 0) {
+            List<ProdTagReference> prodTagReferenceList = new ArrayList<>();
+            //循环商品分组标签id集合
+            tagIdList.forEach(tagId -> {
+                //创建商品与分组标签关系记录
+                ProdTagReference prodTagReference = new ProdTagReference();
+                prodTagReference.setProdId(prodId);
+                prodTagReference.setTagId(tagId);
+                prodTagReference.setCreateTime(new Date());
+                prodTagReference.setShopId(1L);
+                prodTagReference.setStatus(1);
+                //收集关系记录
+                prodTagReferenceList.add(prodTagReference);
+            });
+            //批量添加
+            prodTagReferenceService.saveBatch(prodTagReferenceList);
+        }
+
+        //获取商品sku对象集合
+        List<Sku> skuList = prod.getSkuList();
+        //判断商品sku对象集合是否有值
+        if (CollectionUtil.isNotEmpty(skuList) && skuList.size() != 0) {
+            //修改原始库存数量
+            //循环遍历商品sku对象集合
+            skuList.forEach(sku -> {
+                //获取商品sku库存数量
+                Integer stocks = sku.getStocks();
+                sku.setProdId(prodId);
+                sku.setActualStocks(stocks);
+                sku.setStocks(0);
+                sku.setUpdateTime(new Date());
+                sku.setStatus(1);
+                sku.setIsDelete(0);
+            });
+            //批量添加
+            skuService.saveBatch(skuList);
+        }
+
+        prod.setUpdateTime(new Date());
+        return prodMapper.updateById(prod)>0;
+    }
 }
