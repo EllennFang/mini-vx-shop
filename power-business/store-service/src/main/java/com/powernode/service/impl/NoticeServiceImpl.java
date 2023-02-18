@@ -39,4 +39,10 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
         }
         return noticeMapper.insert(notice)>0;
     }
+
+    @Override
+    public boolean updateById(Notice notice) {
+        notice.setUpdateTime(new Date());
+        return noticeMapper.updateById(notice)>0;
+    }
 }

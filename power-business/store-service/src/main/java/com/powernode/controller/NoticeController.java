@@ -33,4 +33,21 @@ public class NoticeController {
         noticeService.save(notice);
         return ResponseEntity.ok().build();
     }
+
+//    shop/notice/info/6
+    @ApiOperation("根据标识查询公告详情")
+    @GetMapping("info/{noticeId}")
+    @PreAuthorize("hasAuthority('shop:notice:info')")
+    public ResponseEntity<Notice> loadNoticeInfo(@PathVariable Long noticeId) {
+        Notice notice = noticeService.getById(noticeId);
+        return ResponseEntity.ok(notice);
+    }
+
+    @ApiOperation("修改公告内容")
+    @PutMapping
+    @PreAuthorize("hasAuthority('shop:notice:update')")
+    public ResponseEntity<Void> updateNotice(@RequestBody Notice notice) {
+        noticeService.updateById(notice);
+        return ResponseEntity.ok().build();
+    }
 }
