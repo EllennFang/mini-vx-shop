@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
+
 @Service
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> implements NoticeService{
 
@@ -26,5 +28,15 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
                 .like(StringUtils.hasText(notice.getTitle()),Notice::getTitle,notice.getTitle())
                 .orderByDesc(Notice::getIsTop,Notice::getPublishTime)
         );
+    }
+
+    @Override
+    public boolean save(Notice notice) {
+        notice.setUpdateTime(new Date());
+        Integer status = notice.getStatus();
+        if (1 == status) {
+            notice.setPublishTime(new Date());
+        }
+        return noticeMapper.insert(notice)>0;
     }
 }
