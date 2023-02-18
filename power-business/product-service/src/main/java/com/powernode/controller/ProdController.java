@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "商品接口管理")
 @RequestMapping("prod/prod")
 @RestController
@@ -48,6 +50,14 @@ public class ProdController {
     @PreAuthorize("hasAuthority('prod:prod:update')")
     public ResponseEntity<Void> updateProd(@RequestBody Prod prod) {
         prodService.updateById(prod);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiOperation("批量删除商品")
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('prod:prod:delete')")
+    public ResponseEntity<Void> deleteProd(@RequestBody List<Long> prodIds) {
+        prodService.removeByIds(prodIds);
         return ResponseEntity.ok().build();
     }
 }

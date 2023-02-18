@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -205,5 +206,20 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
 
         prod.setUpdateTime(new Date());
         return prodMapper.updateById(prod)>0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public boolean removeByIds(Collection<? extends Serializable> idList) {
+        //删除商品分组标签关系记录
+        prodTagReferenceMapper.delete(new LambdaQueryWrapper<ProdTagReference>()
+                .in(ProdTagReference::getProdId,idList)
+        );
+        //删除商品的sku集合
+        skuMapper.delete(new LambdaQueryWrapper<Sku>()
+                .in(Sku::getProdId,idList)
+        );
+        //删除商品
+        return prodMapper.deleteBatchIds(idList) == idList.size();
     }
 }
