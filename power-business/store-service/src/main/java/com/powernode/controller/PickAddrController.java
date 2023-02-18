@@ -33,4 +33,21 @@ public class PickAddrController {
         pickAddrService.save(pickAddr);
         return ResponseEntity.ok().build();
     }
+
+//    shop/pickAddr/info/1
+    @ApiOperation("根据标识查询自提点详情")
+    @GetMapping("info/{addrId}")
+    @PreAuthorize("hasAuthority('shop:pickAddr:info')")
+    public ResponseEntity<PickAddr> loadPickAddrInfo(@PathVariable Long addrId) {
+        PickAddr pickAddr = pickAddrService.getById(addrId);
+        return ResponseEntity.ok(pickAddr);
+    }
+
+    @ApiOperation("修改自提点地址信息")
+    @PutMapping
+    @PreAuthorize("hasAuthority('shop:pickAddr:update')")
+    public ResponseEntity<Void> updatePickAddr(@RequestBody PickAddr pickAddr) {
+        pickAddrService.updateById(pickAddr);
+        return ResponseEntity.ok().build();
+    }
 }
