@@ -60,4 +60,10 @@ public class ProdController {
         prodService.removeByIds(prodIds);
         return ResponseEntity.ok().build();
     }
+
+    ////////////////////远程接口调用/////////////////////////////////
+    @GetMapping("getProdById")
+    Prod getProdById(@RequestParam Long prodId) {
+        return prodService.getById(prodId);
+    }
 }

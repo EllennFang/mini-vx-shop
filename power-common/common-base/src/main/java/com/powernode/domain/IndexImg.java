@@ -87,5 +87,12 @@ public class IndexImg implements Serializable {
     @TableField(value = "type")
     private Integer type;
 
+    ////////////////////查询轮播图详情//////////////////
+    @TableField(exist = false)
+    private String pic;
+
+    @TableField(exist = false)
+    private String prodName;
+
     private static final long serialVersionUID = 1L;
 }
