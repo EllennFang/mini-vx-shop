@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "轮播图接口管理")
 @RequestMapping("admin/indexImg")
 @RestController
@@ -48,6 +50,14 @@ public class IndexImgController {
     @PreAuthorize("hasAuthority('admin:indexImg:update')")
     public ResponseEntity<Void> updateIndexImg(@RequestBody IndexImg indexImg) {
         indexImgService.updateById(indexImg);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiOperation("批量删除轮播图")
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('admin:indexImg:delete')")
+    public ResponseEntity<Void> deleteIndexImg(@RequestBody List<Long> imgIds) {
+        indexImgService.removeByIds(imgIds);
         return ResponseEntity.ok().build();
     }
 }
