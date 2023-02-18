@@ -50,4 +50,13 @@ public class NoticeController {
         noticeService.updateById(notice);
         return ResponseEntity.ok().build();
     }
+
+//    shop/notice/5
+    @ApiOperation("删除公告")
+    @DeleteMapping("{noticeId}")
+    @PreAuthorize("hasAuthority('shop:notice:delete')")
+    public ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId) {
+        noticeService.removeById(noticeId);
+        return ResponseEntity.ok().build();
+    }
 }
