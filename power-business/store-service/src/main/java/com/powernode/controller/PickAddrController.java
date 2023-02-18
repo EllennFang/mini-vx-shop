@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "自提点接口管理")
 @RequestMapping("shop/pickAddr")
 @RestController
@@ -48,6 +50,14 @@ public class PickAddrController {
     @PreAuthorize("hasAuthority('shop:pickAddr:update')")
     public ResponseEntity<Void> updatePickAddr(@RequestBody PickAddr pickAddr) {
         pickAddrService.updateById(pickAddr);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiOperation("批量删除自提点地址")
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('shop:pickAddr:delete')")
+    public ResponseEntity<Void> deletePickAddr(@RequestBody List<Long> addrIds) {
+        pickAddrService.removeByIds(addrIds);
         return ResponseEntity.ok().build();
     }
 }
