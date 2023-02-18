@@ -4,12 +4,13 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @Builder
@@ -45,13 +46,13 @@ public class Notice implements Serializable {
      * 状态(1:公布 0:撤回)
      */
     @TableField(value = "status")
-    private Boolean status;
+    private Integer status;
 
     /**
      * 是否置顶
      */
     @TableField(value = "is_top")
-    private Byte isTop;
+    private Integer isTop;
 
     /**
      * 发布时间
