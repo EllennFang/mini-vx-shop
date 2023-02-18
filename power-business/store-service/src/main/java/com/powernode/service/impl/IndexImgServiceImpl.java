@@ -64,4 +64,19 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
         }
         return indexImg;
     }
+
+    @Override
+    public boolean updateById(IndexImg indexImg) {
+        //获取状态
+        Integer status = indexImg.getStatus();
+        if (1 == status) {
+            indexImg.setUploadTime(new Date());
+        }
+        //获取轮播图类型type,-1未关联，0关联
+        Integer type = indexImg.getType();
+        if (-1 == type) {
+            indexImg.setRelation(-1L);
+        }
+        return indexImgMapper.updateById(indexImg)>0;
+    }
 }

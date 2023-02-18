@@ -42,4 +42,12 @@ public class IndexImgController {
         IndexImg indexImg = indexImgService.getById(indexImgId);
         return ResponseEntity.ok(indexImg);
     }
+
+    @ApiOperation("修改轮播图信息")
+    @PutMapping
+    @PreAuthorize("hasAuthority('admin:indexImg:update')")
+    public ResponseEntity<Void> updateIndexImg(@RequestBody IndexImg indexImg) {
+        indexImgService.updateById(indexImg);
+        return ResponseEntity.ok().build();
+    }
 }
