@@ -8,9 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "轮播图接口管理")
 @RequestMapping("admin/indexImg")
@@ -26,5 +24,13 @@ public class IndexImgController {
     public ResponseEntity<Page<IndexImg>> loadIndexImgPage(Page<IndexImg> page,IndexImg indexImg) {
         page = indexImgService.selectIndexImgPage(page,indexImg);
         return ResponseEntity.ok(page);
+    }
+
+    @ApiOperation("新增轮播图")
+    @PostMapping
+    @PreAuthorize("hasAuthority('admin:indexImg:save')")
+    public ResponseEntity<Void> saveIndexImg(@RequestBody IndexImg indexImg) {
+        indexImgService.save(indexImg);
+        return ResponseEntity.ok().build();
     }
 }

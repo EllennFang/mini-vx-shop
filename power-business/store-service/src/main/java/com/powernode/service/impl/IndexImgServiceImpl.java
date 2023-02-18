@@ -9,6 +9,9 @@ import com.powernode.mapper.IndexImgMapper;
 import com.powernode.service.IndexImgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+
 @Service
 public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> implements IndexImgService{
 
@@ -23,5 +26,20 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
                 .eq(ObjectUtil.isNotEmpty(indexImg.getStatus()),IndexImg::getStatus,indexImg.getStatus())
                 .orderByDesc(IndexImg::getSeq)
         );
+    }
+
+    @Override
+    public boolean save(IndexImg indexImg) {
+        //获取类型
+        Integer type = indexImg.getType();
+        if (type == -1) {
+            indexImg.setRelation(-1L);
+        }
+        //获取状态
+        Integer status = indexImg.getStatus();
+        if (1 == status) {
+            indexImg.setUploadTime(new Date());
+        }
+        return indexImgMapper.insert(indexImg)>0;
     }
 }
