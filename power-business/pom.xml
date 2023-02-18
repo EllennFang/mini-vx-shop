@@ -14,6 +14,7 @@
     <modules>
         <module>manager-service</module>
         <module>product-service</module>
+        <module>store-service</module>
     </modules>
 
     <properties>
