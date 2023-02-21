@@ -38,3 +38,8 @@ eureka:
     instance-id: ${eureka.instance.hostname}:${spring.application.name}:${server.port}
     #实例续约时间间隔
     lease-renewal-interval-in-seconds: 5
+
+wx:
+  appid: wxc9641573b0638ba2
+  secret: d3a0f5e02126bb6c75d99e6c5d03fd89
+  url: https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code

@@ -3,7 +3,6 @@ package com.powernode.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.powernode.constant.AuthConstant;
@@ -34,6 +33,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private LoginUserMapper loginUserMapper;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${wx.appid}")
+    private String appid;
+    @Value("${wx.secret}")
+    private String secret;
+    @Value("${wx.url}")
+    private String url;
 
 
     /**
@@ -74,12 +83,34 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 }
                 return sysLoginUser;
             case AuthConstant.MEMBER:
-
+                //调用微信 登录凭证校验接口code2Session 来获取 用户唯一标识 OpenID
+//                String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+xxx+"&secret="+xxxx+"&js_code="+username+"&grant_type=authorization_code";
+                String realUrl = String.format(url, appid, secret, username);
+                //调用接口，响应json格式的字符串数据
+                String resultJsonStr = restTemplate.getForObject(realUrl, String.class);
+                //解析json格式的字符串
+                JSONObject jsonObject = JSONObject.parseObject(resultJsonStr);
+                //获取微信用户唯一标识openid
+                String openid = jsonObject.getString("openid");
+                if (!StringUtils.hasText(openid)) {
+                    return null;
+                }
+                //应该去建立自己系统的用户体系
+                //我们需要根据微信openid来绑定用户是否已经存在于我们用户体系内
+                LoginUser loginUser = loginUserMapper.selectOne(new LambdaQueryWrapper<LoginUser>()
+                        .eq(LoginUser::getUserId, openid)
+                );
+                //如果存在：直接登录
+                if (ObjectUtil.isNull(loginUser)) {
+                    //如果不存在：创建用户
+                    loginUser = createLoginUser(openid,request);
+                }
+                return loginUser;
         }
         return null;
     }
 
-    private void createLoginUser(String openid, HttpServletRequest request) {
+    private LoginUser createLoginUser(String openid, HttpServletRequest request) {
         //获取远程ipf址地
         String remoteHost = request.getRemoteHost();
         LoginUser loginUser = LoginUser.builder()
@@ -92,5 +123,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .status(1).build();
         //插入数据库
         loginUserMapper.insert(loginUser);
+        return loginUser;
     }
 }
