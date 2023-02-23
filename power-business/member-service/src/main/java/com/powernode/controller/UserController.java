@@ -9,9 +9,9 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @Api(tags = "用户接口管理")
 @RequestMapping("p/user")
@@ -30,5 +30,18 @@ public class UserController {
                 .eq(User::getUserId, userId)
         );
         return ResponseEntity.ok(StringUtils.hasText(user.getUserMobile()));
+    }
+
+//    p/user/setUserInfo
+    @ApiOperation("更新用户头像和昵称")
+    @PutMapping("setUserInfo")
+    public ResponseEntity<Void> setUserInfo(@RequestBody User user) {
+        String userId = AuthUtil.getLoginUserId();
+        user.setUserId(userId);
+        user.setModifyTime(new Date());
+        userService.update(user,new LambdaQueryWrapper<User>()
+                .eq(User::getUserId,userId)
+        );
+        return ResponseEntity.ok().build();
     }
 }
