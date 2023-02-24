@@ -53,4 +53,12 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
         }
         return userAddrMapper.insert(userAddr)>0;
     }
+
+
+    @Override
+    @CacheEvict(key = "#userAddr.userId")
+    public boolean updateById(UserAddr userAddr) {
+        userAddr.setUpdateTime(new Date());
+        return userAddrMapper.updateById(userAddr)>0;
+    }
 }

@@ -45,4 +45,14 @@ public class UserAddrController {
         UserAddr userAddr = userAddrService.getById(addrId);
         return ResponseEntity.ok(userAddr);
     }
+
+//    p/address/updateAddr
+    @ApiOperation("修改用户收货地址信息")
+    @PutMapping("updateAddr")
+    public ResponseEntity<Void> updateUserAddr(@RequestBody UserAddr userAddr) {
+        String userId = AuthUtil.getLoginUserId();
+        userAddr.setUserId(userId);
+        userAddrService.updateById(userAddr);
+        return ResponseEntity.ok().build();
+    }
 }
