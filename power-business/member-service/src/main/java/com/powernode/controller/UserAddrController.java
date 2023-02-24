@@ -55,4 +55,13 @@ public class UserAddrController {
         userAddrService.updateById(userAddr);
         return ResponseEntity.ok().build();
     }
+
+//    p/address/deleteAddr/9
+    @ApiOperation("删除用户收货地址")
+    @DeleteMapping("deleteAddr/{addrId}")
+    public ResponseEntity<Void> deleteUserAddr(@PathVariable Long addrId) {
+        String userId = AuthUtil.getLoginUserId();
+        userAddrService.deleteUserAddr(userId,addrId);
+        return ResponseEntity.ok().build();
+    }
 }

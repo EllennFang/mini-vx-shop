@@ -14,4 +14,11 @@ public interface UserAddrService extends IService<UserAddr>{
      * @return
      */
     List<UserAddr> selectUserAddrList(String userId);
+
+    /**
+     * 删除用户收货地址
+     * @param userId
+     * @param addrId
+     */
+    void deleteUserAddr(String userId, Long addrId);
 }
