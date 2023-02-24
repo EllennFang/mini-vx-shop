@@ -17,6 +17,7 @@
         <module>store-service</module>
         <module>order-service</module>
         <module>member-service</module>
+        <module>message-service</module>
     </modules>
 
     <properties>

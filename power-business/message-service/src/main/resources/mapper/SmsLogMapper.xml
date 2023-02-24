@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.powernode.mapper.SmsLogMapper">
+  <resultMap id="BaseResultMap" type="com.powernode.domain.SmsLog">
+    <!--@mbg.generated-->
+    <!--@Table sms_log-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="user_phone" jdbcType="VARCHAR" property="userPhone" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="mobile_code" jdbcType="VARCHAR" property="mobileCode" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="rec_date" jdbcType="TIMESTAMP" property="recDate" />
+    <result column="response_code" jdbcType="VARCHAR" property="responseCode" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, user_phone, content, mobile_code, `type`, rec_date, response_code, `status`
+  </sql>
+</mapper>
