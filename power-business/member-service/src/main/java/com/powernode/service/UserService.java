@@ -13,4 +13,10 @@ public interface UserService extends IService<User>{
      * @param map
      */
     void send(Map<String, Object> map);
+
+    /**
+     * 绑定用户手机号码
+     * @param map
+     */
+    void savePhone(Map<String, Object> map);
 }

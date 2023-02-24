@@ -6,10 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -29,5 +26,15 @@ public class SendController {
         map.put("userId",userId);
         userService.send(map);
         return ResponseEntity.ok("发送成功");
+    }
+
+//    p/sms/savePhone
+    @ApiOperation("绑定用户手机号码")
+    @PostMapping("savePhone")
+    public ResponseEntity<Void> savePhone(@RequestBody Map<String,Object> map) {
+        String userId = AuthUtil.getLoginUserId();
+        map.put("userId",userId);
+        userService.savePhone(map);
+        return ResponseEntity.ok().build();
     }
 }
