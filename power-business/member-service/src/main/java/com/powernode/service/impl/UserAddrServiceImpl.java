@@ -96,4 +96,30 @@ public class UserAddrServiceImpl extends ServiceImpl<UserAddrMapper, UserAddr> i
         }
 
     }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    @CacheEvict(key = "#userId")
+    public void updateUserDefaultAddr(String userId, Long addrId) {
+        //查询用户默认收货地址
+        UserAddr oldDefaultUserAddr = userAddrMapper.selectOne(new LambdaQueryWrapper<UserAddr>()
+                .eq(UserAddr::getUserId, userId)
+                .eq(UserAddr::getStatus, 1)
+                .eq(UserAddr::getCommonAddr, 1)
+        );
+        //判断默认收货地址与新的默认收货地址是否一致
+        if (oldDefaultUserAddr.getAddrId() == addrId) {
+            //一致：结束
+            return;
+        }
+        //不一致：更新
+        oldDefaultUserAddr.setCommonAddr(0);
+        userAddrMapper.updateById(oldDefaultUserAddr);
+        //更新新的默认收货地址
+        UserAddr newUserAddr = new UserAddr();
+        newUserAddr.setAddrId(addrId);
+        newUserAddr.setCommonAddr(1);
+        userAddrMapper.updateById(newUserAddr);
+
+    }
 }

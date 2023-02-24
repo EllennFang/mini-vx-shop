@@ -64,4 +64,13 @@ public class UserAddrController {
         userAddrService.deleteUserAddr(userId,addrId);
         return ResponseEntity.ok().build();
     }
+
+//    p/address/defaultAddr/13
+    @ApiOperation("设置用户默认收货地址")
+    @PutMapping("defaultAddr/{addrId}")
+    public ResponseEntity<Void> updateUserDefaultAddr(@PathVariable Long addrId) {
+        String userId = AuthUtil.getLoginUserId();
+        userAddrService.updateUserDefaultAddr(userId,addrId);
+        return ResponseEntity.ok().build();
+    }
 }

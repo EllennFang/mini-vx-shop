@@ -21,4 +21,11 @@ public interface UserAddrService extends IService<UserAddr>{
      * @param addrId
      */
     void deleteUserAddr(String userId, Long addrId);
+
+    /**
+     * 设置用户默认收货地址
+     * @param userId
+     * @param addrId
+     */
+    void updateUserDefaultAddr(String userId, Long addrId);
 }
