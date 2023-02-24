@@ -37,4 +37,12 @@ public class UserAddrController {
         userAddrService.save(userAddr);
         return ResponseEntity.ok().build();
     }
+
+//    p/address/addrInfo/10
+    @ApiOperation("根据标识查询地址详情")
+    @GetMapping("addrInfo/{addrId}")
+    public ResponseEntity<UserAddr> loadUserAddrInfo(@PathVariable Long addrId) {
+        UserAddr userAddr = userAddrService.getById(addrId);
+        return ResponseEntity.ok(userAddr);
+    }
 }
