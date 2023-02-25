@@ -1,7 +1,10 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.ProdTag;
+import com.powernode.domain.ProdTagReference;
+import com.powernode.service.ProdTagReferenceService;
 import com.powernode.service.ProdTagService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +22,9 @@ public class ProdTagController {
 
     @Autowired
     private ProdTagService prodTagService;
+
+    @Autowired
+    private ProdTagReferenceService prodTagReferenceService;
 
     @ApiOperation("多条件分页查询分组标签列表")
     @GetMapping("page")
@@ -78,5 +84,13 @@ public class ProdTagController {
     public ResponseEntity<List<ProdTag>> loadFrontProdTagList() {
         List<ProdTag> list = prodTagService.selectFrontProdTagList();
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("getProdTagReferencePageByTagId")
+    Page<ProdTagReference> getProdTagReferencePageByTagId(@RequestParam Long tagId, @RequestParam Long size) {
+        Page<ProdTagReference> prodTagReferencePage = new Page<>(1,size);
+        return prodTagReferenceService.page(prodTagReferencePage, new LambdaQueryWrapper<ProdTagReference>()
+                .eq(ProdTagReference::getTagId, tagId)
+        );
     }
 }

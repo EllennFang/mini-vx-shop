@@ -66,4 +66,9 @@ public class ProdController {
     Prod getProdById(@RequestParam Long prodId) {
         return prodService.getById(prodId);
     }
+
+    @GetMapping("getProdListByIds")
+    List<Prod> getProdListByIds(@RequestParam List<Long> ids) {
+        return prodService.listByIds(ids);
+    }
 }
