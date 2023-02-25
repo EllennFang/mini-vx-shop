@@ -4,18 +4,25 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.powernode.constant.IndexImgConstant;
 import com.powernode.domain.IndexImg;
 import com.powernode.domain.Prod;
 import com.powernode.feign.IndexImgProdFeign;
 import com.powernode.mapper.IndexImgMapper;
 import com.powernode.service.IndexImgService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Service
+@CacheConfig(cacheNames = "com.powernode.service.impl.IndexImgServiceImpl")
 public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> implements IndexImgService{
 
 
@@ -35,6 +42,7 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     }
 
     @Override
+    @CacheEvict(key = IndexImgConstant.FRONT_INDEX_IMG_LIST)
     public boolean save(IndexImg indexImg) {
         //获取类型
         Integer type = indexImg.getType();
@@ -66,6 +74,7 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
     }
 
     @Override
+    @CacheEvict(key = IndexImgConstant.FRONT_INDEX_IMG_LIST)
     public boolean updateById(IndexImg indexImg) {
         //获取状态
         Integer status = indexImg.getStatus();
@@ -78,5 +87,20 @@ public class IndexImgServiceImpl extends ServiceImpl<IndexImgMapper, IndexImg> i
             indexImg.setRelation(-1L);
         }
         return indexImgMapper.updateById(indexImg)>0;
+    }
+
+    @Override
+    @CacheEvict(key = IndexImgConstant.FRONT_INDEX_IMG_LIST)
+    public boolean removeByIds(Collection<? extends Serializable> idList) {
+        return indexImgMapper.deleteBatchIds(idList) == idList.size();
+    }
+
+    @Override
+    @Cacheable(key = IndexImgConstant.FRONT_INDEX_IMG_LIST)
+    public List<IndexImg> list() {
+        return indexImgMapper.selectList(new LambdaQueryWrapper<IndexImg>()
+                .eq(IndexImg::getStatus,1)
+                .orderByDesc(IndexImg::getSeq)
+        );
     }
 }

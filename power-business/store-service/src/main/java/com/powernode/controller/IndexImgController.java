@@ -60,4 +60,13 @@ public class IndexImgController {
         indexImgService.removeByIds(imgIds);
         return ResponseEntity.ok().build();
     }
+
+    /////////////////////////微信小程序数据接口///////////////////////////////
+//    admin/indexImg/indexImgs
+    @ApiOperation("查询小程序页面轮播图列表")
+    @GetMapping("indexImgs")
+    public ResponseEntity<List<IndexImg>> loadFrontIndexImg() {
+        List<IndexImg> list = indexImgService.list();
+        return ResponseEntity.ok(list);
+    }
 }
