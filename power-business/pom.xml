@@ -19,6 +19,7 @@
         <module>member-service</module>
         <module>message-service</module>
         <module>search-service</module>
+        <module>cart-service</module>
     </modules>
 
     <properties>
