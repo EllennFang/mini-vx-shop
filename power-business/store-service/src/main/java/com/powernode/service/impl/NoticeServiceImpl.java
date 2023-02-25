@@ -10,10 +10,12 @@ import com.powernode.mapper.NoticeMapper;
 import com.powernode.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(key = NoticeConstant.FRONT_NOTICE_LIST)
     public boolean save(Notice notice) {
         notice.setUpdateTime(new Date());
         Integer status = notice.getStatus();
@@ -46,9 +49,16 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     }
 
     @Override
+    @CacheEvict(key = NoticeConstant.FRONT_NOTICE_LIST)
     public boolean updateById(Notice notice) {
         notice.setUpdateTime(new Date());
         return noticeMapper.updateById(notice)>0;
+    }
+
+    @Override
+    @CacheEvict(key = NoticeConstant.FRONT_NOTICE_LIST)
+    public boolean removeById(Serializable id) {
+        return noticeMapper.deleteById(id)>0;
     }
 
     @Override

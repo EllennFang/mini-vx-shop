@@ -3,6 +3,9 @@ package com.powernode.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.ProdTag;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
+
 public interface ProdTagService extends IService<ProdTag>{
 
 
@@ -13,4 +16,11 @@ public interface ProdTagService extends IService<ProdTag>{
      * @return
      */
     Page<ProdTag> selectProdTagPage(Page<ProdTag> page, ProdTag prodTag);
+
+    /**
+     * 查询商品分组标签集合
+     * @return
+     */
+    List<ProdTag> selectFrontProdTagList();
+
 }

@@ -69,4 +69,14 @@ public class ProdTagController {
         List<ProdTag> list = prodTagService.list();
         return ResponseEntity.ok(list);
     }
+
+
+    ////////////////////////微信小程序数据接口//////////////////
+//    prod/prodTag/prodTagList
+    @ApiOperation("查询商品分组标签集合")
+    @GetMapping("prodTagList")
+    public ResponseEntity<List<ProdTag>> loadFrontProdTagList() {
+        List<ProdTag> list = prodTagService.selectFrontProdTagList();
+        return ResponseEntity.ok(list);
+    }
 }
