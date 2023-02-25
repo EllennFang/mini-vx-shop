@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "公告接口管理")
 @RequestMapping("shop/notice")
 @RestController
@@ -58,5 +60,14 @@ public class NoticeController {
     public ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId) {
         noticeService.removeById(noticeId);
         return ResponseEntity.ok().build();
+    }
+
+    //////////////////////微信小程序数据接口/////////////////////////
+//    shop/notice/topNoticeList
+    @ApiOperation("查询小程序公告列表")
+    @GetMapping("topNoticeList")
+    public ResponseEntity<List<Notice>> loadNoticeList() {
+        List<Notice> list = noticeService.list();
+        return ResponseEntity.ok(list);
     }
 }

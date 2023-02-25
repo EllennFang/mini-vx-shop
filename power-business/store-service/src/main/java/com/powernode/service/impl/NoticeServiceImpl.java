@@ -4,16 +4,21 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.powernode.constant.NoticeConstant;
 import com.powernode.domain.Notice;
 import com.powernode.mapper.NoticeMapper;
 import com.powernode.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
+@CacheConfig(cacheNames = "com.powernode.service.impl.NoticeServiceImpl")
 public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> implements NoticeService{
 
 
@@ -44,5 +49,14 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> impleme
     public boolean updateById(Notice notice) {
         notice.setUpdateTime(new Date());
         return noticeMapper.updateById(notice)>0;
+    }
+
+    @Override
+    @Cacheable(key = NoticeConstant.FRONT_NOTICE_LIST)
+    public List<Notice> list() {
+        return noticeMapper.selectList(new LambdaQueryWrapper<Notice>()
+                .eq(Notice::getStatus,1)
+                .orderByDesc(Notice::getIsTop)
+        );
     }
 }
