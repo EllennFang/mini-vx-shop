@@ -10,6 +10,7 @@ import com.powernode.domain.ProdComm;
 import com.powernode.mapper.ProdCommMapper;
 import com.powernode.mapper.ProdMapper;
 import com.powernode.service.ProdCommService;
+import com.powernode.vo.ProdCommOverview;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,6 +18,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,5 +93,54 @@ public class ProdCommServiceImpl extends ServiceImpl<ProdCommMapper, ProdComm> i
         String remoteHost = request.getRemoteHost();
         prodComm.setPostip(remoteHost);
         return prodCommMapper.updateById(prodComm)>0;
+    }
+
+    @Override
+    public ProdCommOverview selectProdCommOverview(Long prodId) {
+
+        //评论总数量
+        Integer number = prodCommMapper.selectCount(new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getStatus, 1)
+                .eq(ProdComm::getProdId, prodId)
+        );
+        //好评数量
+        Integer praiseNumber = prodCommMapper.selectCount(new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getStatus, 1)
+                .eq(ProdComm::getEvaluate,0)
+                .eq(ProdComm::getProdId, prodId)
+        );
+        //中评数量
+        Integer secondaryNumber = prodCommMapper.selectCount(new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getStatus, 1)
+                .eq(ProdComm::getEvaluate,1)
+                .eq(ProdComm::getProdId, prodId)
+        );
+        //差评数量
+        Integer negativeNumber = prodCommMapper.selectCount(new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getStatus, 1)
+                .eq(ProdComm::getEvaluate,2)
+                .eq(ProdComm::getProdId, prodId)
+        );
+        //有图评论数量
+        Integer picNumber = prodCommMapper.selectCount(new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getStatus, 1)
+                .eq(ProdComm::getProdId, prodId)
+                .isNotNull(ProdComm::getPics)
+        );
+        //好评率 = 好评数 / 评论总数量
+        BigDecimal positiveRating = BigDecimal.ZERO;
+        if (0 != number) {
+            positiveRating = new BigDecimal(praiseNumber)
+                    .divide(new BigDecimal(number),2, RoundingMode.HALF_DOWN)
+                    .multiply(new BigDecimal(100));
+        }
+
+        return ProdCommOverview.builder()
+                .number(number)
+                .praiseNumber(praiseNumber)
+                .secondaryNumber(secondaryNumber)
+                .negativeNumber(negativeNumber)
+                .picNumber(picNumber)
+                .positiveRating(positiveRating).build();
     }
 }

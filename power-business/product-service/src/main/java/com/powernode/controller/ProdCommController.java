@@ -3,6 +3,7 @@ package com.powernode.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.ProdComm;
 import com.powernode.service.ProdCommService;
+import com.powernode.vo.ProdCommOverview;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,14 @@ public class ProdCommController {
     public ResponseEntity<Void> updateProdComm(@RequestBody ProdComm prodComm) {
         prodCommService.updateById(prodComm);
         return ResponseEntity.ok().build();
+    }
+
+    ////////////////////微信小程序数据接口/////////////////////////////////////
+//    prod/prodComm/prodComm/prodCommData?prodId=95
+    @ApiOperation("查询单个商品评论总览信息")
+    @GetMapping("prodComm/prodCommData")
+    public ResponseEntity<ProdCommOverview> loadProdCommOverview(@RequestParam Long prodId) {
+        ProdCommOverview prodCommOverview = prodCommService.selectProdCommOverview(prodId);
+        return ResponseEntity.ok(prodCommOverview);
     }
 }
