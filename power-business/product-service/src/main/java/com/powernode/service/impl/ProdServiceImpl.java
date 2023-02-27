@@ -222,4 +222,19 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         //删除商品
         return prodMapper.deleteBatchIds(idList) == idList.size();
     }
+
+
+    @Override
+    public Prod selectProdAndSkuDetailById(Long prodId) {
+        //根据标识查询商品详情
+        Prod prod = prodMapper.selectById(prodId);
+        //根据标识查询商品sku详情
+        List<Sku> skuList = skuMapper.selectList(new LambdaQueryWrapper<Sku>()
+                .eq(Sku::getProdId, prodId)
+                .eq(Sku::getStatus, 1)
+        );
+        prod.setSkuList(skuList);
+
+        return prod;
+    }
 }

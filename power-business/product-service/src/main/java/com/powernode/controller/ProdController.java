@@ -71,4 +71,14 @@ public class ProdController {
     List<Prod> getProdListByIds(@RequestParam List<Long> ids) {
         return prodService.listByIds(ids);
     }
+
+
+    ////////////////////微信小程序数据接口/////////////////////////////
+//    prod/prod/prod/prodInfo?prodId=60
+    @ApiOperation("根据标识查询商品详情和商品sku")
+    @GetMapping("prod/prodInfo")
+    public ResponseEntity<Prod> loadProdAndSkuDetail(@RequestParam Long prodId) {
+        Prod prod = prodService.selectProdAndSkuDetailById(prodId);
+        return ResponseEntity.ok(prod);
+    }
 }

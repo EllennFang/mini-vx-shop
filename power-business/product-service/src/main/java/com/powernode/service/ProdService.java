@@ -13,4 +13,11 @@ public interface ProdService extends IService<Prod>{
      * @return
      */
     Page<Prod> selectProdPage(Page<Prod> page, Prod prod);
+
+    /**
+     * 根据标识查询商品详情和商品sku
+     * @param prodId
+     * @return
+     */
+    Prod selectProdAndSkuDetailById(Long prodId);
 }
