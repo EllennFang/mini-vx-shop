@@ -8,10 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "用户收藏接口管理")
 @RequestMapping("p/collection")
@@ -41,5 +38,14 @@ public class UserCollectionController {
                 .eq(UserCollection::getProdId, prodId)
         );
         return ResponseEntity.ok(count == 1);
+    }
+
+//    p/collection/addOrCancel
+    @ApiOperation("用户收藏或取消收藏商品")
+    @PostMapping("addOrCancel")
+    public ResponseEntity<Void> addOrCancelProd(@RequestBody Long prodId) {
+        String userId = AuthUtil.getLoginUserId();
+        userCollectionService.addOrCancelProd(userId,prodId);
+        return ResponseEntity.ok().build();
     }
 }
