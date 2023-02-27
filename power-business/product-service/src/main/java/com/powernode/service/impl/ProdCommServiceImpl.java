@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.powernode.domain.Prod;
 import com.powernode.domain.ProdComm;
+import com.powernode.domain.User;
+import com.powernode.feign.ProdCommUserFeign;
 import com.powernode.mapper.ProdCommMapper;
 import com.powernode.mapper.ProdMapper;
 import com.powernode.service.ProdCommService;
@@ -32,6 +34,9 @@ public class ProdCommServiceImpl extends ServiceImpl<ProdCommMapper, ProdComm> i
 
     @Autowired
     private ProdMapper prodMapper;
+
+    @Autowired
+    private ProdCommUserFeign prodCommUserFeign;
 
 
     @Override
@@ -142,5 +147,58 @@ public class ProdCommServiceImpl extends ServiceImpl<ProdCommMapper, ProdComm> i
                 .negativeNumber(negativeNumber)
                 .picNumber(picNumber)
                 .positiveRating(positiveRating).build();
+    }
+
+    /**
+     * 1.分页查询商品评论
+     * 2.获取评论用户的id集合
+     * 3.根据用户id集合查询用户信息
+     * 4.组装数据
+     *
+     *
+     * @param page
+     * @param prodId
+     * @param evaluate
+     * @return
+     */
+    @Override
+    public Page<ProdComm> selectProdCommPageByProd(Page<ProdComm> page, Long prodId, Long evaluate) {
+        //分页查询商品评论
+        page = prodCommMapper.selectPage(page,new LambdaQueryWrapper<ProdComm>()
+                .eq(ProdComm::getProdId,prodId)
+                .eq(ProdComm::getStatus,1)
+                .eq(evaluate != null && evaluate != -1 && evaluate != 3,ProdComm::getEvaluate,evaluate)
+                .isNotNull(evaluate == 3,ProdComm::getPics)
+                .orderByDesc(ProdComm::getRecTime)
+        );
+        //获取评论记录
+        List<ProdComm> prodCommList = page.getRecords();
+        //判断是否有值
+        if (CollectionUtil.isEmpty(prodCommList) || prodCommList.size() == 0) {
+            return page;
+        }
+        //获取评论的用户id集合
+        List<String> userIds = prodCommList.stream().map(ProdComm::getUserId).collect(Collectors.toList());
+        //根据用户id集合查询用户对象集合
+        List<User> userList = prodCommUserFeign.getUserListByUserIds(userIds);
+        if (CollectionUtil.isEmpty(userList) || userList.size() == 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+        //循环遍历评论记录并组装数据
+        prodCommList.forEach(prodComm -> {
+            //从用户集合中过滤出与当前评论的用户id一致的用户对象
+            User user1 = userList.stream()
+                    .filter(user -> user.getUserId().equals(prodComm.getUserId()))
+                    .collect(Collectors.toList()).get(0);
+            //组装数据
+            String nickName = user1.getNickName();
+            StringBuffer stringBuffer = new StringBuffer(nickName);
+            stringBuffer.replace(1,stringBuffer.length()-1,"***");
+            String pic = user1.getPic();
+            prodComm.setNickName(stringBuffer.toString());
+            prodComm.setPic(pic);
+        });
+
+        return page;
     }
 }

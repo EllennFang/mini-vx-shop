@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Api(tags = "用户接口管理")
 @RequestMapping("p/user")
@@ -43,5 +44,13 @@ public class UserController {
                 .eq(User::getUserId,userId)
         );
         return ResponseEntity.ok().build();
+    }
+
+    /////////////////////远程接口调用////////////////////////////
+    @GetMapping("getUserListByUserIds")
+    List<User> getUserListByUserIds(@RequestParam List<String> userIds) {
+        return userService.list(new LambdaQueryWrapper<User>()
+                .in(User::getUserId,userIds)
+        );
     }
 }

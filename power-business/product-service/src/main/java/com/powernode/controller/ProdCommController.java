@@ -52,4 +52,12 @@ public class ProdCommController {
         ProdCommOverview prodCommOverview = prodCommService.selectProdCommOverview(prodId);
         return ResponseEntity.ok(prodCommOverview);
     }
+
+//    /prod/prodComm/prodComm/prodCommPageByProd?prodId=95&size=10&current=1&evaluate=2
+    @ApiOperation("分页查询单个商品的评论")
+    @GetMapping("prodComm/prodCommPageByProd")
+    public ResponseEntity<Page<ProdComm>> loadProdCommPageByProd(Page<ProdComm> page,Long prodId,Long evaluate) {
+        page = prodCommService.selectProdCommPageByProd(page,prodId,evaluate);
+        return ResponseEntity.ok(page);
+    }
 }

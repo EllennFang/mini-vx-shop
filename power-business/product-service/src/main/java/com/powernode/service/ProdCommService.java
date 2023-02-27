@@ -22,4 +22,13 @@ public interface ProdCommService extends IService<ProdComm>{
      * @return
      */
     ProdCommOverview selectProdCommOverview(Long prodId);
+
+    /**
+     * 分页查询单个商品的评论
+     * @param page
+     * @param prodId
+     * @param evaluate
+     * @return
+     */
+    Page<ProdComm> selectProdCommPageByProd(Page<ProdComm> page, Long prodId, Long evaluate);
 }
