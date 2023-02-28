@@ -11,11 +11,13 @@ import com.powernode.mapper.BasketMapper;
 import com.powernode.model.CartItem;
 import com.powernode.model.ShopCart;
 import com.powernode.service.BasketService;
+import com.powernode.vo.CartTotalAmount;
 import com.powernode.vo.CartVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,5 +135,48 @@ public class BasketServiceImpl extends ServiceImpl<BasketMapper, Basket> impleme
 
         cartVo.setShopCarts(shopCartList);
         return cartVo;
+    }
+
+    @Override
+    public CartTotalAmount calculateUserCartTotalAmount(List<Long> basketIdList) {
+        CartTotalAmount cartTotalAmount = new CartTotalAmount();
+        //根据购物车id集合查询购物车对象集合
+        List<Basket> basketList = basketMapper.selectBatchIds(basketIdList);
+        if (CollectionUtil.isEmpty(basketList) || basketList.size() == 0) {
+            return cartTotalAmount;
+        }
+
+        //从购物车对象集合中获取商品skuId集合
+        List<Long> skuIdList = basketList.stream().map(Basket::getSkuId).collect(Collectors.toList());
+        //远程调用，根据商品skuId集合查询商品sku对象集合
+        List<Sku> skuList = basketSkuFeign.getSkuListBySkuIds(skuIdList);
+        if (CollectionUtil.isEmpty(skuList) || skuList.size() == 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+        List<BigDecimal> allOneSkuTotalAmount = new ArrayList<>();
+        //循环购物车对象集合
+        basketList.forEach(basket -> {
+            //从商品sku对象集合中过滤出与当前购物车中商品sku对象一致的商品sku
+            Sku sku1 = skuList.stream()
+                    .filter(sku -> sku.getSkuId().equals(basket.getSkuId()))
+                    .collect(Collectors.toList()).get(0);
+            //计算单个商品总金额
+            Integer basketCount = basket.getBasketCount();
+            BigDecimal price = sku1.getPrice();
+            BigDecimal oneSkuTotalAmount = price.multiply(new BigDecimal(basketCount));
+            allOneSkuTotalAmount.add(oneSkuTotalAmount);
+        });
+
+        //计算所有商品总金额
+        BigDecimal allSkuTotalAmount = allOneSkuTotalAmount.stream().reduce(BigDecimal::add).get();
+        cartTotalAmount.setFinalMoney(allSkuTotalAmount);
+        cartTotalAmount.setTotalMoney(allSkuTotalAmount);
+        //计算运费：商品总额超过99免运费，否则运费6块
+        if (allSkuTotalAmount.compareTo(new BigDecimal(99)) == -1) {
+            cartTotalAmount.setTransMoney(new BigDecimal(6));
+            cartTotalAmount.setFinalMoney(allSkuTotalAmount.add(new BigDecimal(6)));
+        }
+
+        return cartTotalAmount;
     }
 }
