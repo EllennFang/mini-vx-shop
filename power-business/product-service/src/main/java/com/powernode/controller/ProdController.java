@@ -2,7 +2,9 @@ package com.powernode.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.Prod;
+import com.powernode.domain.Sku;
 import com.powernode.service.ProdService;
+import com.powernode.service.SkuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class ProdController {
 
     @Autowired
     private ProdService prodService;
+
+    @Autowired
+    private SkuService skuService;
 
     @ApiOperation("多条件分页查询商品列表")
     @GetMapping("page")
@@ -70,6 +75,11 @@ public class ProdController {
     @GetMapping("getProdListByIds")
     List<Prod> getProdListByIds(@RequestParam List<Long> ids) {
         return prodService.listByIds(ids);
+    }
+
+    @GetMapping("getSkuListBySkuIds")
+    List<Sku> getSkuListBySkuIds(@RequestParam List<Long> skuIdList) {
+        return skuService.listByIds(skuIdList);
     }
 
 
