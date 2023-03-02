@@ -3,11 +3,9 @@ package com.powernode.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.powernode.domain.Order;
-import com.powernode.domain.OrderItem;
-import com.powernode.domain.Sku;
-import com.powernode.domain.UserAddr;
+import com.powernode.domain.*;
 import com.powernode.dto.OrderConfirmDto;
+import com.powernode.feign.OrderBasketFeign;
 import com.powernode.feign.OrderSkuFeign;
 import com.powernode.feign.OrderUserAddrFeign;
 import com.powernode.mapper.OrderMapper;
@@ -20,10 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService{
@@ -37,6 +33,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private OrderSkuFeign orderSkuFeign;
+
+    @Autowired
+    private OrderBasketFeign orderBasketFeign;
 
 
     @Override
@@ -83,10 +82,77 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         } else {
             //订单来自于：购物车页面
             orderVo.setSource(1);
-//            cartToConfirm(orderVo,basketIds);
+            cartToConfirm(userId,orderVo,basketIds);
         }
 
         return orderVo;
+    }
+
+    private void cartToConfirm(String userId,OrderVo orderVo, List<Long> basketIds) {
+
+        //远程调用:根据购物车id集合查询购物车对象集合
+        List<Basket> basketList = orderBasketFeign.getBasketsByIds(basketIds);
+        if (CollectionUtil.isEmpty(basketList) || basketList.size() == 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+
+        //从购物车集合对象中获取商品skuId集合
+        List<Long> skuIdList = basketList.stream().map(Basket::getSkuId).collect(Collectors.toList());
+        //远程调用：根据商品skuId集合查询商品sku对象集合
+        List<Sku> skuList = orderSkuFeign.getSkuListBySkuIds(skuIdList);
+        if (CollectionUtil.isEmpty(skuList) || skuList.size() == 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+        List<ShopOrder> shopOrderList = new ArrayList<>();
+        //将购物车对象集合使用stream流程进行分组
+        Map<Long, List<Basket>> allShopOrderMap = basketList.stream().collect(Collectors.groupingBy(Basket::getShopId));
+        List<BigDecimal> allOneSkuTotalAmounts = new ArrayList<>();
+        List<Integer> allOneSkuCounts = new ArrayList<>();
+        //循环遍历map集合
+        allShopOrderMap.forEach((shopId,baskets) -> {
+            //创建一个店铺对象
+            ShopOrder shopOrder = new ShopOrder();
+            List<OrderItem> orderItemList = new ArrayList<>();
+            //循环遍历当前店铺中的购物车记录
+            for(Basket basket:baskets){
+                //创建订单商品条目对象
+                OrderItem orderItem = new OrderItem();
+                //将购物軖对象中的属性copy到商品条目对象中
+                BeanUtils.copyProperties(basket,orderItem);
+                //从商品sku集合对象中过滤出与当前购物车记录中商品skuId一致的商品对象
+                Sku sku1 = skuList.stream().filter(sku -> sku.getSkuId().equals(basket.getSkuId())).collect(Collectors.toList()).get(0);
+                BeanUtils.copyProperties(sku1,orderItem);
+                orderItem.setUserId(userId);
+                orderItem.setRecTime(new Date());
+                orderItem.setCommSts(0);
+                //计算 单个商品总金额
+                Integer basketCount = basket.getBasketCount();
+                orderItem.setProdCount(basketCount);
+                allOneSkuCounts.add(basketCount);
+                BigDecimal oneSkuTotalAmount = sku1.getPrice().multiply(new BigDecimal(basketCount));
+                allOneSkuTotalAmounts.add(oneSkuTotalAmount);
+                orderItem.setProductTotalAmount(oneSkuTotalAmount);
+
+                orderItemList.add(orderItem);
+            }
+
+            shopOrder.setShopCartItemDiscounts(orderItemList);
+            shopOrderList.add(shopOrder);
+        });
+
+        //计算购买商品总数量
+        Integer allSkuTotalCount = allOneSkuCounts.stream().reduce(Integer::sum).get();
+        //计算所有商品总金额
+        BigDecimal allSkuTotalAmount = allOneSkuTotalAmounts.stream().reduce(BigDecimal::add).get();
+        orderVo.setTotalCount(allSkuTotalCount);
+        orderVo.setTotal(allSkuTotalAmount);
+        orderVo.setActualTotal(allSkuTotalAmount);
+        //计算运费
+        if (allSkuTotalAmount.compareTo(new BigDecimal(99)) == -1) {
+            orderVo.setTransfee(new BigDecimal(6));
+            orderVo.setActualTotal(allSkuTotalAmount.add(new BigDecimal(6)));
+        }
+        orderVo.setShopCartOrders(shopOrderList);
     }
 
     private void productToConfirm(String userId,OrderVo orderVo, OrderItem orderItem) {

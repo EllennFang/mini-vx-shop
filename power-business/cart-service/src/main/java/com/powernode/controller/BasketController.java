@@ -64,4 +64,10 @@ public class BasketController {
         basketService.removeByIds(basketIds);
         return ResponseEntity.ok().build();
     }
+
+    //////////////////////远程接口调用/////////////////////////
+    @GetMapping("getBasketsByIds")
+    List<Basket> getBasketsByIds(@RequestParam List<Long> basketIds) {
+        return basketService.listByIds(basketIds);
+    }
 }
