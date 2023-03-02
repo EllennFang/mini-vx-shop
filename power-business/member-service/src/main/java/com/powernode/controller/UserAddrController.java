@@ -1,5 +1,6 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.powernode.domain.UserAddr;
 import com.powernode.service.UserAddrService;
 import com.powernode.utils.AuthUtil;
@@ -72,5 +73,14 @@ public class UserAddrController {
         String userId = AuthUtil.getLoginUserId();
         userAddrService.updateUserDefaultAddr(userId,addrId);
         return ResponseEntity.ok().build();
+    }
+
+    //////////////////////远程接口//////////////////////////
+    @GetMapping("getUserDefaultAddr")
+    UserAddr getUserDefaultAddr(@RequestParam String userId) {
+        return userAddrService.getOne(new LambdaQueryWrapper<UserAddr>()
+                .eq(UserAddr::getCommonAddr,1)
+                .eq(UserAddr::getUserId,userId)
+        );
     }
 }
