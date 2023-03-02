@@ -30,4 +30,10 @@ public interface BasketService extends IService<Basket>{
      * @return
      */
     CartTotalAmount calculateUserCartTotalAmount(List<Long> basketIdList);
+
+    /**
+     * 添加商品到购物车或修改购物车中商品数量
+     * @param basket
+     */
+    void changeItem(Basket basket);
 }

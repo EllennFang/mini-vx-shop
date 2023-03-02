@@ -1,6 +1,7 @@
 package com.powernode.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,5 +180,37 @@ public class BasketServiceImpl extends ServiceImpl<BasketMapper, Basket> impleme
         }
 
         return cartTotalAmount;
+    }
+
+    /**
+     * 1.根据商品skuid和用户标识查询购物车中商品是否存在
+     * 2.存在：更新数量
+     * 3.不存在：添加商品到购物车
+     *
+     *
+     *
+     * @param basket
+     */
+    @Override
+    public void changeItem(Basket basket) {
+        //根据商品skuId和用户标识查询购物车记录
+        Basket oldBasket = basketMapper.selectOne(new LambdaQueryWrapper<Basket>()
+                .eq(Basket::getSkuId, basket.getSkuId())
+                .eq(Basket::getUserId, basket.getUserId())
+        );
+        //判断是否存在
+        if (ObjectUtil.isNull(oldBasket)) {
+            //将商品添加到购物车中
+            basket.setBasketDate(new Date());
+            basket.setShopId(1L);
+            basketMapper.insert(basket);
+            return;
+        }
+        //存在：更新商品中购物车中的数量即可
+        //计算商品的数量
+        int finalCount = oldBasket.getBasketCount() + basket.getBasketCount();
+        oldBasket.setBasketCount(finalCount);
+        oldBasket.setBasketDate(new Date());
+        basketMapper.updateById(oldBasket);
     }
 }

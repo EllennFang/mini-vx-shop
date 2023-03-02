@@ -1,5 +1,6 @@
 package com.powernode.controller;
 
+import com.powernode.domain.Basket;
 import com.powernode.service.BasketService;
 import com.powernode.utils.AuthUtil;
 import com.powernode.vo.CartTotalAmount;
@@ -44,5 +45,15 @@ public class BasketController {
     public ResponseEntity<CartTotalAmount> loadUserCartTotalAmount(@RequestBody List<Long> basketIdList) {
         CartTotalAmount cartTotalAmount = basketService.calculateUserCartTotalAmount(basketIdList);
         return ResponseEntity.ok(cartTotalAmount);
+    }
+
+//    p/shopCart/changeItem
+    @ApiOperation("添加商品到购物车或修改购物车中商品数量")
+    @PostMapping("changeItem")
+    public ResponseEntity<Void> changeItem(@RequestBody Basket basket) {
+        String userId = AuthUtil.getLoginUserId();
+        basket.setUserId(userId);
+        basketService.changeItem(basket);
+        return ResponseEntity.ok().build();
     }
 }
