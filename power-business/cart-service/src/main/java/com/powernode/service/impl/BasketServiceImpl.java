@@ -142,6 +142,9 @@ public class BasketServiceImpl extends ServiceImpl<BasketMapper, Basket> impleme
     @Override
     public CartTotalAmount calculateUserCartTotalAmount(List<Long> basketIdList) {
         CartTotalAmount cartTotalAmount = new CartTotalAmount();
+        if (CollectionUtil.isEmpty(basketIdList) || basketIdList.size() == 0) {
+            return cartTotalAmount;
+        }
         //根据购物车id集合查询购物车对象集合
         List<Basket> basketList = basketMapper.selectBatchIds(basketIdList);
         if (CollectionUtil.isEmpty(basketList) || basketList.size() == 0) {
