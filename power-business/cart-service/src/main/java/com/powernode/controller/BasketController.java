@@ -56,4 +56,12 @@ public class BasketController {
         basketService.changeItem(basket);
         return ResponseEntity.ok().build();
     }
+
+//    p/shopCart/deleteItem
+    @ApiOperation("删除购物车中商品")
+    @DeleteMapping("deleteItem")
+    public ResponseEntity<Void> deleteItem(@RequestBody List<Long> basketIds) {
+        basketService.removeByIds(basketIds);
+        return ResponseEntity.ok().build();
+    }
 }
