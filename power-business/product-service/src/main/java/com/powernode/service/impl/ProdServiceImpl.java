@@ -12,6 +12,9 @@ import com.powernode.domain.Sku;
 import com.powernode.mapper.ProdMapper;
 import com.powernode.mapper.ProdTagReferenceMapper;
 import com.powernode.mapper.SkuMapper;
+import com.powernode.model.ChangeStock;
+import com.powernode.model.ProdChange;
+import com.powernode.model.SkuChange;
 import com.powernode.service.ProdService;
 import com.powernode.service.ProdTagReferenceService;
 import com.powernode.service.SkuService;
@@ -236,5 +239,31 @@ public class ProdServiceImpl extends ServiceImpl<ProdMapper, Prod> implements Pr
         prod.setSkuList(skuList);
 
         return prod;
+    }
+
+    @Override
+    public void changeStock(ChangeStock changeStock) {
+        //获取商品sku库存数量对象
+        List<SkuChange> skuChangeList = changeStock.getSkuChangeList();
+        for (SkuChange skuChange:skuChangeList){
+            Long skuId = skuChange.getSkuId();
+            Sku sku = skuMapper.selectById(skuId);
+
+            int i = skuMapper.changeSkuStock(skuId,skuChange.getCount(),sku.getVersion());
+            if (i <= 0) {
+                throw new RuntimeException("库存数量不足");
+            }
+        }
+        //获取商品prod库存数量对象
+        List<ProdChange> prodChangeList = changeStock.getProdChangeList();
+        for (ProdChange prodChange:prodChangeList){
+            Long prodId = prodChange.getProdId();
+            Prod prod = prodMapper.selectById(prodId);
+
+            int i = prodMapper.changeProdStock(prodId,prodChange.getCount(),prod.getVersion());
+            if (i <= 0) {
+                throw new RuntimeException("库存数量不足");
+            }
+        }
     }
 }

@@ -9,7 +9,10 @@ import com.powernode.feign.OrderBasketFeign;
 import com.powernode.feign.OrderSkuFeign;
 import com.powernode.feign.OrderUserAddrFeign;
 import com.powernode.mapper.OrderMapper;
+import com.powernode.model.ChangeStock;
+import com.powernode.model.ProdChange;
 import com.powernode.model.ShopOrder;
+import com.powernode.model.SkuChange;
 import com.powernode.service.OrderService;
 import com.powernode.vo.OrderStatus;
 import com.powernode.vo.OrderVo;
@@ -219,7 +222,66 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //来自于购物车页面-》清除购物车中购买的商品
             clearUserCart(userId,orderVo);
         }
+
+        //修改商品prod和sku库存数量
+        ChangeStock changeStock = changeProdAndSkuStock(orderVo);
         return null;
+    }
+
+    /**
+     * 修改商品prod和sku库存数量
+     * @param orderVo
+     * @return
+     */
+    private ChangeStock changeProdAndSkuStock(OrderVo orderVo) {
+
+        List<ProdChange> prodChangeList = new ArrayList<>();
+        List<SkuChange> skuChangeList = new ArrayList<>();
+        //获取店铺集合对象
+        List<ShopOrder> shopOrderList = orderVo.getShopCartOrders();
+        //循环店铺集合对象
+        shopOrderList.forEach(shopOrder -> {
+            //从店铺对象中获取商品条目集合对象
+            List<OrderItem> orderItemList = shopOrder.getShopCartItemDiscounts();
+            //循环遍历商品条目集合对象
+            orderItemList.forEach(orderItem -> {
+                //获取商品prodId
+                Long prodId = orderItem.getProdId();
+                //获取商品skuId
+                Long skuId = orderItem.getSkuId();
+                //获取商品购买数量
+                Integer prodCount = orderItem.getProdCount()*-1;
+
+                //判断当前orderItem商品条目对象中的商品prodId是否与prodChangeList中的商品prodId有一致
+                List<ProdChange> prodChanges = prodChangeList.stream()
+                        .filter(prodChange -> prodChange.getProdId().equals(prodId))
+                        .collect(Collectors.toList());
+
+                //商品prod第1次
+                SkuChange skuChange = new SkuChange();
+                skuChange.setSkuId(skuId);
+                skuChange.setCount(prodCount);
+                skuChangeList.add(skuChange);
+
+                ProdChange prodChange = null;
+                if (CollectionUtil.isEmpty(prodChanges) || prodChanges.size() == 0) {
+                    prodChange = new ProdChange();
+                    prodChange.setProdId(prodId);
+                    prodChange.setCount(prodCount);
+                    prodChangeList.add(prodChange);
+                } else {
+                    prodChange = prodChanges.get(0);
+                    Integer beforeCount = prodChange.getCount();
+                    int finalCount = beforeCount + prodCount;
+                    prodChange.setCount(finalCount);
+                }
+            });
+        });
+        //组装数据
+        ChangeStock changeStock = new ChangeStock(prodChangeList,skuChangeList);
+        //远程调用:修改商品prod和sku库存数量
+        orderSkuFeign.changeStock(changeStock);
+        return changeStock;
     }
 
     /**

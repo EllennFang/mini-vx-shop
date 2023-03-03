@@ -3,6 +3,8 @@ package com.powernode.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.Prod;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.powernode.model.ChangeStock;
+
 public interface ProdService extends IService<Prod>{
 
 
@@ -20,4 +22,10 @@ public interface ProdService extends IService<Prod>{
      * @return
      */
     Prod selectProdAndSkuDetailById(Long prodId);
+
+    /**
+     * 修改商品prod和sku库存数量
+     * @param changeStock
+     */
+    void changeStock(ChangeStock changeStock);
 }

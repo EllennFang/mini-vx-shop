@@ -3,6 +3,7 @@ package com.powernode.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.powernode.domain.Prod;
 import com.powernode.domain.Sku;
+import com.powernode.model.ChangeStock;
 import com.powernode.service.ProdService;
 import com.powernode.service.SkuService;
 import io.swagger.annotations.Api;
@@ -80,6 +81,11 @@ public class ProdController {
     @GetMapping("getSkuListBySkuIds")
     List<Sku> getSkuListBySkuIds(@RequestParam List<Long> skuIdList) {
         return skuService.listByIds(skuIdList);
+    }
+
+    @PostMapping("changeStock")
+    void changeStock(@RequestBody ChangeStock changeStock) {
+        prodService.changeStock(changeStock);
     }
 
 
