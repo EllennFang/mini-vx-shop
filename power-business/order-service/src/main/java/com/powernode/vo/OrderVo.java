@@ -43,4 +43,7 @@ public class OrderVo {
 
     @ApiModelProperty("确认订单来自于哪儿，0商品详情页面，1购物车")
     private Integer source = 0;
+
+    @ApiModelProperty("订单备注")
+    private String remarks;
 }

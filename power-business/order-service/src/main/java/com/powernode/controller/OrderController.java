@@ -35,4 +35,13 @@ public class OrderController {
         OrderVo orderVo = orderService.selectOrderConfirmInfo(userId,orderConfirmDto);
         return ResponseEntity.ok(orderVo);
     }
+
+//    p/myOrder/submit
+    @ApiOperation("提交订单")
+    @PostMapping("submit")
+    public ResponseEntity<String> submitOrder(@RequestBody OrderVo orderVo) {
+        String userId = AuthUtil.getLoginUserId();
+        String orderNumber = orderService.submitOrder(userId,orderVo);
+        return ResponseEntity.ok(orderNumber);
+    }
 }

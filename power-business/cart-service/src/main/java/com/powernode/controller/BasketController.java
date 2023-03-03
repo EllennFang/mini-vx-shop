@@ -1,5 +1,6 @@
 package com.powernode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.powernode.domain.Basket;
 import com.powernode.service.BasketService;
 import com.powernode.utils.AuthUtil;
@@ -69,5 +70,13 @@ public class BasketController {
     @GetMapping("getBasketsByIds")
     List<Basket> getBasketsByIds(@RequestParam List<Long> basketIds) {
         return basketService.listByIds(basketIds);
+    }
+
+    @PostMapping("clearBasketSkuList")
+    Boolean clearBasketSkuList(@RequestBody List<Long> skuIdList,@RequestParam String userId) {
+        return basketService.remove(new LambdaQueryWrapper<Basket>()
+                .eq(Basket::getUserId,userId)
+                .in(Basket::getSkuId,skuIdList)
+        );
     }
 }

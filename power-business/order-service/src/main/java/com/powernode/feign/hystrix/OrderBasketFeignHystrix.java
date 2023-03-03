@@ -17,4 +17,10 @@ public class OrderBasketFeignHystrix implements OrderBasketFeign {
         log.error("远程调用失败：根据购物车id集合查询购物车对象集合");
         return null;
     }
+
+    @Override
+    public Boolean clearBasketSkuList(List<Long> skuIdList, String userId) {
+        log.error("远程调用失败：删除购物车中的商品");
+        return null;
+    }
 }

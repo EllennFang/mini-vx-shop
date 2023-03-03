@@ -24,4 +24,11 @@ public interface OrderService extends IService<Order>{
      */
     OrderVo selectOrderConfirmInfo(String userId, OrderConfirmDto orderConfirmDto);
 
+    /**
+     * 提交订单
+     * @param userId
+     * @param orderVo
+     * @return
+     */
+    String submitOrder(String userId, OrderVo orderVo);
 }

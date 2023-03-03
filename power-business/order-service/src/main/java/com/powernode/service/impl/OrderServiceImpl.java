@@ -16,6 +16,7 @@ import com.powernode.vo.OrderVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -195,5 +196,55 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         shopOrder.setShopCartItemDiscounts(orderItemList);
         shopOrderList.add(shopOrder);
         orderVo.setShopCartOrders(shopOrderList);
+    }
+
+    /**
+     * 1.判断订单确认页面的请求是否来自于购物车页面
+     *     是：将当前购买的商品从购物车中清除
+     *     不是：不需要做任何处理
+     * 2.修改商品在数据库中库存数量：商品prod和商品sku的库存数量
+     * 3.生成订单：生成全局唯一的订单号，生成订单记录和生成订单详情商品记录
+     * 4.如果订单超时，我们需要将商品购买的数量进行回滚
+     *     使用消息队列中的延迟队列+死信队列
+     * @param userId
+     * @param orderVo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public String submitOrder(String userId, OrderVo orderVo) {
+        //获取订单确认页面来源标签
+        Integer source = orderVo.getSource();
+        if (source.equals(1)) {
+            //来自于购物车页面-》清除购物车中购买的商品
+            clearUserCart(userId,orderVo);
+        }
+        return null;
+    }
+
+    /**
+     * 清除用户购物车中商品
+     * @param userId
+     * @param orderVo
+     */
+    private void clearUserCart(String userId, OrderVo orderVo) {
+        //获取订单店铺集合对象
+        List<ShopOrder> shopOrderList = orderVo.getShopCartOrders();
+        //从订单店铺对象集合中的订单商品条目对象集合中获取商品skuId集合
+        List<Long> skuIdList = new ArrayList<>();
+        shopOrderList.forEach(shopOrder -> {
+            //从店铺对象中获取商品条目集合对象
+            List<OrderItem> orderItemList = shopOrder.getShopCartItemDiscounts();
+            //循环遍历商品条目集合对象
+            orderItemList.forEach(orderItem -> {
+                //获取商品skuId
+                Long skuId = orderItem.getSkuId();
+                skuIdList.add(skuId);
+            });
+        });
+        //远程调用:删除购物车中的商品
+        if (!orderBasketFeign.clearBasketSkuList(skuIdList, userId)) {
+            throw new RuntimeException("服务器开小差了");
+        }
     }
 }
