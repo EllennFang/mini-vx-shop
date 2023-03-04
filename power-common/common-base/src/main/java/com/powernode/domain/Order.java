@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
     * 订单表
@@ -157,7 +158,7 @@ public class Order implements Serializable {
      * 是否已经支付，1：已经支付过，0：，没有支付过
      */
     @TableField(value = "is_payed")
-    private Boolean isPayed;
+    private Integer isPayed;
 
     /**
      * 用户订单删除状态，0：没有删除， 1：回收站， 2：永久删除
@@ -181,13 +182,13 @@ public class Order implements Serializable {
      * 订单类型
      */
     @TableField(value = "order_type")
-    private Byte orderType;
+    private Integer orderType;
 
     /**
      * 订单关闭原因 1-超时未支付 2-退款关闭 4-买家取消 15-已通过货到付款交易
      */
     @TableField(value = "close_type")
-    private Byte closeType;
+    private Integer closeType;
 
     private static final long serialVersionUID = 1L;
 }

@@ -1,6 +1,7 @@
 package com.powernode.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Snowflake;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.powernode.domain.*;
@@ -13,6 +14,7 @@ import com.powernode.model.ChangeStock;
 import com.powernode.model.ProdChange;
 import com.powernode.model.ShopOrder;
 import com.powernode.model.SkuChange;
+import com.powernode.service.OrderItemService;
 import com.powernode.service.OrderService;
 import com.powernode.vo.OrderStatus;
 import com.powernode.vo.OrderVo;
@@ -40,6 +42,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private OrderBasketFeign orderBasketFeign;
+
+    @Autowired
+    private Snowflake snowflake;
+
+    @Autowired
+    private OrderItemService orderItemService;
 
 
     @Override
@@ -225,7 +233,85 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         //修改商品prod和sku库存数量
         ChangeStock changeStock = changeProdAndSkuStock(orderVo);
+
+        //生成全局唯一订单号
+        String orderNumber = generateOrderNumber();
+
+        //写订单和订单详情信息和
+        writeOrder(userId,orderNumber,orderVo);
+
         return null;
+    }
+
+    private void writeOrder(String userId, String orderNumber, OrderVo orderVo) {
+        List<BigDecimal> allOneSkuTotalAmounts = new ArrayList<>();
+        List<Integer> allOneSkuTotalCounts = new ArrayList<>();
+        StringBuffer prodNames = new StringBuffer();
+        List<OrderItem> orderItems = new ArrayList<>();
+        //获取订单店铺对象集合
+        List<ShopOrder> shopOrderList = orderVo.getShopCartOrders();
+        //循环遍历订单店铺对象集合
+        shopOrderList.forEach(shopOrder -> {
+            //获取店铺中订单商品条目集合对象
+            List<OrderItem> orderItemList = shopOrder.getShopCartItemDiscounts();
+            //循环遍历订单商品条目集合对象
+            orderItemList.forEach(orderItem -> {
+                //完善订单商品条目对象信息
+                orderItem.setOrderNumber(orderNumber);
+                orderItem.setUserId(userId);
+                //单个商品总金额
+                BigDecimal oneSkuTotalAmount = orderItem.getProductTotalAmount();
+                allOneSkuTotalAmounts.add(oneSkuTotalAmount);
+                //单个商品购买数量
+                Integer prodCount = orderItem.getProdCount();
+                allOneSkuTotalCounts.add(prodCount);
+                //商品名称
+                String prodName = orderItem.getProdName();
+                prodNames.append(prodName).append(",");
+                orderItems.add(orderItem);
+            });
+        });
+
+        //批量生成订单详情信息
+        if (!orderItemService.saveBatch(orderItems)) {
+            throw new RuntimeException("服务器开小差了");
+        }
+        //组装订单总览信息
+        Order order = new Order();
+        order.setProdName(prodNames.toString());
+        order.setUserId(userId);
+        order.setOrderNumber(orderNumber);
+        //计算总值
+        BigDecimal allSkuTotalAmount = allOneSkuTotalAmounts.stream().reduce(BigDecimal::add).get();
+        order.setTotal(allSkuTotalAmount);
+        order.setActualTotal(allSkuTotalAmount);
+        order.setFreightAmount(BigDecimal.ZERO);
+        if (allSkuTotalAmount.compareTo(new BigDecimal(99)) == -1) {
+            order.setActualTotal(allSkuTotalAmount.add(new BigDecimal(6)));
+            order.setFreightAmount(new BigDecimal(6));
+
+        }
+        order.setPayType(1);
+        order.setRemarks(orderVo.getRemarks());
+        order.setStatus(1);
+        order.setAddrOrderId(orderVo.getUserAddr().getAddrId());
+        //计算商品总数量
+        Integer allSkuCount = allOneSkuTotalCounts.stream().reduce(Integer::sum).get();
+        order.setProductNums(allSkuCount);
+        order.setCreateTime(new Date());
+        order.setUpdateTime(new Date());
+        order.setIsPayed(0);
+        order.setDeleteStatus(0);
+        order.setRefundSts(0);
+        int i = orderMapper.insert(order);
+        if (i <= 0) {
+            throw new RuntimeException("服务器开小差了");
+        }
+
+    }
+
+    private String generateOrderNumber() {
+        return snowflake.nextIdStr();
     }
 
     /**
