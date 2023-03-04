@@ -2,8 +2,10 @@ package com.powernode.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Snowflake;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.powernode.constant.QueueConstant;
 import com.powernode.domain.*;
 import com.powernode.dto.OrderConfirmDto;
 import com.powernode.feign.OrderBasketFeign;
@@ -18,6 +20,7 @@ import com.powernode.service.OrderItemService;
 import com.powernode.service.OrderService;
 import com.powernode.vo.OrderStatus;
 import com.powernode.vo.OrderVo;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,9 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService{
 
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private OrderMapper orderMapper;
@@ -240,7 +246,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //写订单和订单详情信息和
         writeOrder(userId,orderNumber,orderVo);
 
-        return null;
+        //将商品修改的库存数量消息存放到消息队列
+        sendMsMsg(orderNumber,changeStock);
+
+        return orderNumber;
+    }
+
+    private void sendMsMsg(String orderNumber, ChangeStock changeStock) {
+        //将数据转换为json数据格式存放到消息队列中
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("orderNumber",orderNumber);
+        jsonObject.put("changeStock",changeStock);
+        rabbitTemplate.convertAndSend(QueueConstant.ORDER_MS_QUEUE,jsonObject.toJSONString());
+
     }
 
     private void writeOrder(String userId, String orderNumber, OrderVo orderVo) {
@@ -394,5 +412,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (!orderBasketFeign.clearBasketSkuList(skuIdList, userId)) {
             throw new RuntimeException("服务器开小差了");
         }
+    }
+
+    @Override
+    public void orderRollBack(Order order, ChangeStock changeStock) {
+        //修改订单状态
+        order.setStatus(6);
+        order.setCloseType(1);
+        order.setUpdateTime(new Date());
+        order.setFinallyTime(new Date());
+        orderMapper.updateById(order);
+
+        //回滚商品购买的数量
+        List<SkuChange> skuChangeList = changeStock.getSkuChangeList();
+        skuChangeList.forEach(skuChange -> {
+            skuChange.setCount(skuChange.getCount()*-1);
+        });
+        List<ProdChange> prodChangeList = changeStock.getProdChangeList();
+        prodChangeList.forEach(prodChange -> {
+            prodChange.setCount(prodChange.getCount()*-1);
+        });
+        //远程调用
+        orderSkuFeign.changeStock(changeStock);
     }
 }
